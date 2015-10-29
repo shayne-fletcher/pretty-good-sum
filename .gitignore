@@ -26,3 +26,8 @@
 *.exe
 *.out
 *.app
+*.ilk
+*.pdb
+
+# Emacs temp files
+*~
