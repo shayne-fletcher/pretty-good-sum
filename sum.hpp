@@ -53,45 +53,10 @@ public:
 
   sum_type& operator= (sum_type const& other);
 
-  /*
   template <class R, class... Fs> R match(Fs&&... fs) const;
   template <class R, class... Fs> R match(Fs&&... fs);
   template <class... Fs> void match(Fs&&... fs) const;
   template <class... Fs> void match(Fs&&... fs);
-  */
-
-
-  template <class R, class... Fs>
-  R match(Fs&&... fs) const {
-    using indicies = range_t<0, sizeof... (Ts) - 1>;
-
-    return union_visitor<R, indicies, Ts...>::visit (
-                  data, cons, std::forward<Fs>(fs)...);
-  }
-
-  template <class R, class... Fs>
-  R match(Fs&&... fs) {
-    using indicies = range_t<0, sizeof... (Ts) - 1>;
-
-    return union_visitor<R, indicies, Ts...>::visit (
-                  data, cons, std::forward<Fs>(fs)...);
-  }
-
-  template <class... Fs>
-  void match(Fs&&... fs) const {
-    using indicies = range_t<0, sizeof... (Ts) - 1>;
-
-    union_visitor<void, indicies, Ts...>::visit (
-                  data, cons, std::forward<Fs>(fs)...);
-  }
-
-  template <class... Fs>
-  void match(Fs&&... fs) {
-    using indicies = range_t<0, sizeof... (Ts) - 1>;
-   
-    union_visitor<void, indicies, Ts...>::visit (
-                  data, cons, std::forward<Fs>(fs)...);
-  }
 
 };
 
@@ -128,7 +93,6 @@ sum_type<Ts...>& sum_type<Ts...>::operator= (sum_type const& other) {
   return *this;
 }
 
-  /*
 template<class... Ts>
   template <class R, class... Fs>
 R sum_type<Ts...>::match(Fs&&... fs) const {
@@ -163,7 +127,6 @@ void sum_type<Ts...>::match(Fs&&... fs) {
   union_visitor<void, indicies, Ts...>::visit (
                 data, cons, std::forward<Fs>(fs)...);
 }
-  */
 
 }//namespace pgs
 
