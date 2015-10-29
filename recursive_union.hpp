@@ -293,7 +293,7 @@ struct union_visitor<void, range<I, Is...>, recursive_wrapper<T>, Ts...> {
   //const& u')
   template <class... Fs>
   static result_type visit (
-    recursive_union<U, Ts...> const& u, std::size_t i, Fs&&... fs) {
+     recursive_union<U, Ts...> const& u, std::size_t i, Fs&&... fs) {
     if (i == I) {
       //'u' is a reference (call 'get ()')
       overload_tag<type> o{};
