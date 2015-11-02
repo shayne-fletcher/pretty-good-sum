@@ -1,6 +1,10 @@
 #if !defined(RECURSIVE_WRAPPER_77D62153_38D6_4311_8B5C_384D740BDF6E_H)
 #  define RECURSIVE_WRAPPER_77D62153_38D6_4311_8B5C_384D740BDF6E_H
 
+/*!
+ * \file recursive_wrapper.hpp
+ */
+
 // Copyright Eric Friedman, Itay Maman 2002-2003
 
 #include <type_traits>

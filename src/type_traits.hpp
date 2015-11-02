@@ -1,6 +1,10 @@
 #if !defined(TYPE_TRAITS_FF88A4C7_86DE_434F_93B7_B03DCA5B4578_H)
 #  define TYPE_TRAITS_FF88A4C7_86DE_434F_93B7_B03DCA5B4578_H
 
+/*!
+ * \file type_traits.hpp
+ */
+
 #  include <type_traits>
 
 namespace pgs { 

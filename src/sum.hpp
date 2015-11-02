@@ -1,6 +1,10 @@
 #if !defined(SUM_F8718480_DC1C_4410_84C0_DDDA2C2FED94_H)
 #  define SUM_F8718480_DC1C_4410_84C0_DDDA2C2FED94_H
 
+/*!
+ * \file sum.hpp
+ */
+
 #  include "recursive_union.hpp"
 
 #  include <cstddef>

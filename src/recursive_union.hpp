@@ -1,6 +1,10 @@
 #if !defined (RECURSIVE_UNION_93F14ED0_E99B_4CF3_8A9B_EBE084D9079C_H)
 #  define RECURSIVE_UNION_93F14ED0_E99B_4CF3_8A9B_EBE084D9079C_H
 
+/*!
+ * \file recursive_union.hpp
+ */
+
 #  include "logical.hpp"
 #  include "recursive_wrapper.hpp"
 #  include "type_traits.hpp"
