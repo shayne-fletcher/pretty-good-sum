@@ -1,9 +1,20 @@
 #if !defined(SUM_F8718480_DC1C_4410_84C0_DDDA2C2FED94_H)
 #  define SUM_F8718480_DC1C_4410_84C0_DDDA2C2FED94_H
-
-/*!
- * \file sum.hpp
- */
+//! \mainpage
+//!
+//! \section abstract Abstract
+//!
+//! A library implementing a "pretty good sum type".
+//!
+//! \image html prettygood.png
+//!
+//! \file sum.hpp
+//!
+//! \brief Contains the definition of the (pretty good) `sum_type`
+//!
+//! \details A type for modeling "sums with constructors" as used in the
+//! (algebraic datatype concepts of the) functional approach to
+//! programming.
 
 #  include "recursive_union.hpp"
 
@@ -11,6 +22,7 @@
 
 namespace pgs {
 
+//! \cond
 namespace detail {
 
   template <std::size_t I, class T, class... Ts> 
@@ -32,11 +44,23 @@ namespace detail {
   };
 
 }//namespace detail
+//! \endcond
+
+//! \brief A metafunction to compute the index `I` of a type `T` in a
+//! sequence `Ts`
+//!
+//! \tparam T The type for which we desire its index in `Ts`
+//! \tparam Ts A parameter pack containing `T`
 
 template <class T, class... Ts>
 struct index_of {
   static auto const value = detail::index_of_impl<0u, T, Ts...>::value;
 };
+
+//! \class sum_type
+//!
+//! \brief A type modeling "sums with constructors" as used in
+//! functional programming
 
 template <class... Ts>
 class sum_type {
@@ -46,23 +70,31 @@ private:
   
 public:
 
+  //! Ctor
   template <class T, class... Args>
   explicit sum_type (constructor<T> t, Args&&... args);
 
   sum_type () = delete;
-  sum_type (sum_type const& other);
-  sum_type (sum_type&& other);
+  sum_type (sum_type const& other); //!< Copy ctor
+  sum_type (sum_type&& other); //!< Move ctor
 
-  ~sum_type();
+  ~sum_type(); //!< Dtor
 
+  //! Copy-assign operator
   sum_type& operator= (sum_type const& other);
 
+  //! `match` function, `const` overoad
   template <class R, class... Fs> R match(Fs&&... fs) const;
+  //! `match` function, non-`const` overoad
   template <class R, class... Fs> R match(Fs&&... fs);
+  //! `match` procedure, `const` overoad
   template <class... Fs> void match(Fs&&... fs) const;
+  //! `match` procedure, non-`const` overoad
   template <class... Fs> void match(Fs&&... fs);
 
 };
+
+//! \cond
 
 template <class... Ts>
 sum_type<Ts...>::sum_type (sum_type const& other) : cons (other.cons) {
@@ -131,6 +163,8 @@ void sum_type<Ts...>::match(Fs&&... fs) {
   union_visitor<void, indicies, Ts...>::visit (
                 data, cons, std::forward<Fs>(fs)...);
 }
+
+//! \endcond
 
 }//namespace pgs
 

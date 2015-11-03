@@ -1,6 +1,7 @@
 //"c:/program files (x86)/Microsoft Visual Studio 14.0/vc/vcvarsall.bat" x64
 //cl /Fepgs.exe /Zi /MDd /EHsc /I d:/boost_1_59_0 pgs.cpp
 
+
 #include "sum.hpp"
 
 #include <iostream>
@@ -77,3 +78,4 @@ int main () {
 
   return 0;
 }
+

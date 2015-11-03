@@ -1,41 +1,67 @@
 #if !defined(RECURSIVE_WRAPPER_77D62153_38D6_4311_8B5C_384D740BDF6E_H)
 #  define RECURSIVE_WRAPPER_77D62153_38D6_4311_8B5C_384D740BDF6E_H
 
-/*!
- * \file recursive_wrapper.hpp
- */
-
-// Copyright Eric Friedman, Itay Maman 2002-2003
+//! \file recursive_wrapper.hpp
+//!
+//! \brief A workaround for the absence of recursive types
+//!
+//! \copyright Copyright Eric Friedman, Itay Maman 2002-2003 (Boost
+//! software license)
+//! \copyright Copyright Shayne Fletcher, 2015
 
 #include <type_traits>
 
 namespace pgs {
 
-template <class> class recursive_wrapper; //fwd. decl.
+//! \cond
+template <class T>
+class recursive_wrapper; //fwd. decl.
+//! \endcond
 
-//is_recursive_wrapper
+//! \brief Primary template of a metafunction to classify a type as
+//! `recursive_wrapper<>` or not
+//!
+//! \returns Type equivalent to one of `std::true_type` or
+//! `std::false_type`
 
-template <class> 
+template <class T> 
 struct is_recursive_wrapper : std::false_type 
 {};
+
+//! \brief Partial specialization for types that are recursive
+//! wrappers
+
 template <class T> 
 struct is_recursive_wrapper<recursive_wrapper<T>> : std::true_type 
 {};
 
-//unwrap_recursive_wrapper
+//! \brief Primary template of a metafunction to compute the type
+//! contained by a `recursive_wrapper<>`.
+//
+//! \returns `T` if `T` is not a `recursive_wrapper<>` else `T::type`
 
 template <class T>
 struct unwrap_recursive_wrapper {
   typedef T type;
 };
+
+//! \brief Partial specialization for types that are recursive
+//! wrappers
+
 template <class T>
 struct unwrap_recursive_wrapper<recursive_wrapper<T>> {
   typedef T type;
 };
+
+//! \brief Alias template for the result of `unwrap_recursive_wrapper<>`.
+
 template <class W>
 using unwrap_recursive_wrapper_t = typename unwrap_recursive_wrapper<W>::type;
 
-//recursive_wrapper
+//! \class recursive_wrapper<>
+//!
+//! \brief A type to enable working around the absence of recursive
+//! types
 
 template <class T>
 class recursive_wrapper {
@@ -46,29 +72,45 @@ private:
   recursive_wrapper& assign (T const& rhs);
 
 public:
-  typedef T type;
+  typedef T type;   //!< Alias `type` for `T`
 
 public:
 
+  //! Forwarding ctor (heap allocates `type` instance)
   template <class... Args> recursive_wrapper (Args&&... args);
+  //! Copy ctor
   recursive_wrapper (recursive_wrapper const& rhs);
-  recursive_wrapper (T const& rhs);
+  //! Copy-construct from `type`
+  recursive_wrapper (type const& rhs);
+  //! Move-construct from `recursive_wrapper`
   recursive_wrapper(recursive_wrapper&& rhs);
-  recursive_wrapper(T&& rhs);
-
+  //! Move-construct from `type`
+  recursive_wrapper(type&& rhs);
+  //! Destructor (frees heap-allocated `type` instance)
   ~recursive_wrapper();
 
+  //! Copy-assign from `recursive_wrapper`
   recursive_wrapper& operator=(recursive_wrapper const& rhs);
-  recursive_wrapper& operator=(T const& rhs);
+  //! Copy-assign from `type`
+  recursive_wrapper& operator=(type const& rhs);
+  //! Move-assign from `recursive_wrapper`
   recursive_wrapper& operator=(recursive_wrapper&& rhs) noexcept;
-  recursive_wrapper& operator=(T&& rhs);
+  //! Move-assign from `type`
+  recursive_wrapper& operator=(type&& rhs);
+
+  //! Swap with `recursive_wrapper`
   void swap(recursive_wrapper& rhs) noexcept;
 
-  T& get();
-  T const& get() const;
-  T* get_pointer();
-  T const* get_pointer() const;
+  type& get(); //!< Accessor to the `type` instance
+  type const& get() const; //!< Accessor to the `type` instance
+  type* get_pointer(); //!< Accessor to the `type` instance
+  type const* get_pointer() const; //!< Accessor to the `type` instance
 };
+
+}//namespace pgs
+
+//! \cond
+namespace pgs {
 
 template<class T>
   template <class... Args> 
@@ -153,5 +195,7 @@ template <typename T>
 T const* recursive_wrapper<T>::get_pointer() const { return p_; }
 
 }//namespace pgs
+
+//! \endcond
 
 #endif //!defined(RECURSIVE_WRAPPER_77D62153_38D6_4311_8B5C_384D740BDF6E_H)

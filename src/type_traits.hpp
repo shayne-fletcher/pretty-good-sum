@@ -1,31 +1,42 @@
 #if !defined(TYPE_TRAITS_FF88A4C7_86DE_434F_93B7_B03DCA5B4578_H)
 #  define TYPE_TRAITS_FF88A4C7_86DE_434F_93B7_B03DCA5B4578_H
 
-/*!
- * \file type_traits.hpp
- */
+//! \file type_traits.hpp
+//!
+//! \brief At this time contains only a metafunction for determining
+//! if a given type `F` is "callable" on a parameter pack of arguments
+//! `Args`
 
 #  include <type_traits>
 
 namespace pgs { 
 
-  struct no {};
+  //! \cond
+  namespace detail {
+    struct no {};
+  }//namespace detail
+  //! \endcond
+
+  //! \brief Metafunction to determine if an instance of a type `F`
+  //! can be applied to a tuple of parameters with types determined by
+  //! the template parameter pack `Args`
 
   template<typename F, typename...Args>
   struct is_callable {
 
+    //!\cond
     template<class G, class...Qs>
     static auto check(G g, Qs...qs) -> decltype(g(qs...));
 
-    static no check(...);
+    static detail::no check(...);
 
     static constexpr bool value = 
      !std::is_same<
-        no
+        detail::no
       , decltype(check (std::declval<F>(), std::declval<Args>()...))>::value;
 
-  	//using type =
-  	//	decltype(check(std::declval<F>(), std::declval<Args>()...));
+    //!\endcond
+
   };
 
 }//namespace pgs

@@ -1,4 +1,4 @@
-PROJECT_NAME           = "Pretty good sum type"
+PROJECT_NAME           = "Pretty Good Sum Type"
 PROJECT_NUMBER         = @VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 STRIP_FROM_PATH        = "@CMAKE_CURRENT_SOURCE_DIR@/src"
 INPUT                  = "@CMAKE_CURRENT_SOURCE_DIR@/src"
@@ -9,4 +9,4 @@ OUTPUT_DIRECTORY="@CMAKE_CURRENT_BINARY_DIR@"
 USE_PDFLATEX=NO
 MACRO_EXPANSION=YES
 TAGFILES += "@CMAKE_SOURCE_DIR@/doxygen/cppreference-doxygen-web.tag.xml=http://en.cppreference.com/w/"
-
+IMAGE_PATH="@CMAKE_SOURCE_DIR@/images"

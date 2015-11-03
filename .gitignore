@@ -31,3 +31,6 @@
 
 # Emacs temp files
 *~
+
+# Build directory
+build
