@@ -1,6 +1,7 @@
 //"c:/program files (x86)/Microsoft Visual Studio 14.0/vc/vcvarsall.bat" x64
 //cl /Fepgs.exe /Zi /MDd /EHsc /I d:/boost_1_59_0 pgs.cpp
 
+#include <gtest/gtest.h>
 
 #include "sum.hpp"
 
@@ -14,7 +15,7 @@ struct E_mul;
 struct E_div;
 
 using xpr_t = pgs::sum_type<
-    E_const
+  E_const
   , pgs::recursive_wrapper<E_add>
   , pgs::recursive_wrapper<E_sub>
   , pgs::recursive_wrapper<E_mul>
@@ -50,17 +51,16 @@ struct E_div {
 std::ostream& operator << (std::ostream& os, xpr_t const& e) {
 
   return e.match<std::ostream&> (
-
     [&](E_const const& e) -> auto& { return os << e.i;  },
     [&](E_mul const& e) -> auto& { return os << e.l << "*" << e.r;  },
     [&](E_div const& e)-> auto&  { return os << e.l << "/" << e.r;  },
     [&](E_add const& e) -> auto& { return os << "(" << e.l << " + " << e.r << ")"; },
     [&](E_sub const& e) -> auto& { return os << "(" << e.l << " - " << e.r << ")"; }
-  );
+   );
 
-}
+  }
 
-int main () {
+TEST (pgs, breathing) {
 
   //n=2 + 3
   xpr_t n{
@@ -74,8 +74,7 @@ int main () {
   xpr_t xpr = xpr_t{pgs::constructor<E_div>{}, n, d};
 
   //print
-  std::cout << xpr << std::endl;
-
-  return 0;
+  std::ostringstream os;
+  os << xpr;
+  ASSERT_EQ (os.str (), std::string {"(2 + 3)/5"});
 }
-
