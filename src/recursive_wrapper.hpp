@@ -115,26 +115,26 @@ namespace pgs {
 template<class T>
   template <class... Args> 
 recursive_wrapper<T>::recursive_wrapper (Args&&... args) : 
-    p_(new T (std::forward<Args>(args)...)) 
-{}
+    p_(new T (std::forward<Args>(args)...)) {
+}
 
 template<class T>
 recursive_wrapper<T>::recursive_wrapper (recursive_wrapper const& rhs) : 
-    p_ (new T (rhs.get ())) 
-{}
+    p_ (new T (rhs.get ())) {
+}
 
 template<class T>
-recursive_wrapper<T>::recursive_wrapper (T const& rhs) : p_ (new T (rhs)) 
-{}
+recursive_wrapper<T>::recursive_wrapper (T const& rhs) : p_ (new T (rhs)) {
+}
 
 template<class T>
 recursive_wrapper<T>::recursive_wrapper(recursive_wrapper&& rhs) : 
-    p_ (new T (std::move (rhs.get ()))) 
-  {}
+    p_ (new T (std::move (rhs.get ()))) {
+}
 
 template <class T>
-recursive_wrapper<T>::recursive_wrapper(T&& rhs) : p_ (new T (std::move (rhs))) 
-{}
+recursive_wrapper<T>::recursive_wrapper(T&& rhs) : p_ (new T (std::move (rhs))) {
+}
 
 template <class T>
 recursive_wrapper<T>::~recursive_wrapper() {

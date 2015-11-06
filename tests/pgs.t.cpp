@@ -1,11 +1,6 @@
-//"c:/program files (x86)/Microsoft Visual Studio 14.0/vc/vcvarsall.bat" x64
-//cl /Fepgs.exe /Zi /MDd /EHsc /I d:/boost_1_59_0 pgs.cpp
-
 #include <gtest/gtest.h>
 
 #include "sum.hpp"
-
-#include <iostream>
 
 struct E_const;
 struct E_add;
@@ -58,7 +53,7 @@ std::ostream& operator << (std::ostream& os, xpr_t const& e) {
     [&](E_sub const& e) -> auto& { return os << "(" << e.l << " - " << e.r << ")"; }
    );
 
-  }
+}
 
 TEST (pgs, breathing) {
 

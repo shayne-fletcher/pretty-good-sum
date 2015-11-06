@@ -39,17 +39,15 @@ set(PGS_HPP
 )
 set(PGS_CPP) #There are no .cpp files
 
-set (PGS_IMG
-	${CMAKE_CURRENT_SOURCE_DIR}/images/prettygood.png
-)
-
 #Install
 
 INSTALL(FILES ${PGS_HPP} DESTINATION include) #Headers
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/images DESTINATION share/doc/images) #Images
 
 SET(PGS_TESTS_CPP 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/pgs.t.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/tests/pgs.t.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/move.t.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/copy.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/main.t.cpp
 )
 ADD_EXECUTABLE(pgs_test ${PGS_TESTS_CPP})

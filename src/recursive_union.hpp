@@ -494,6 +494,7 @@ namespace pgs {
        std::is_nothrow_copy_constructible<T>::value
        && noexcept (std::declval<recursive_union>().r.copy (i - 1, u.r))
       ) {
+      //std::cout << "recursive_union.copy ()\n";
       if (i == 0) {
         new (std::addressof (v)) T (u.v);
       }
@@ -511,11 +512,12 @@ namespace pgs {
     //! \param i When zero, the destination of the move
     //! \param u Source of the move
 
-    void move (std::size_t i, recursive_union const& u) 
+    void move (std::size_t i, recursive_union&& u) 
       noexcept (
         std::is_nothrow_move_constructible<T>::value
-       && noexcept (std::declval<recurive_union>().r.move (i - 1, std::move (u.r)))
-      ) {
+       && noexcept (std::declval<recursive_union>().r.move (i - 1, std::move (u.r)))
+       ) {
+      //std::cout << "recursive_union.move ()\n";
       if (i == 0) {
         new (std::addressof (v)) T (std::move (u.v));
       }

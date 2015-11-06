@@ -16,9 +16,35 @@
 //! (algebraic datatype concepts of the) functional approach to
 //! programming.
 
+//! \file sum_type.hpp
+//! \copyright Copyright (c) 2013 Björn Aili
+//! \copyright Copyright Shayne Fletcher, 2015
+/*
+ * Copyright (c) 2013 Björn Aili
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ * claim that you wrote the original software. If you use this software
+ * in a product, an acknowledgment in the product documentation would be
+ * appreciated but is not required.
+ *
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ * misrepresented as being the original software.
+ *
+ * 3. This notice may not be removed or altered from any source
+ * distribution.
+ */
 #  include "recursive_union.hpp"
 
 #  include <cstddef>
+#  include <iostream>
 
 namespace pgs {
 
@@ -83,6 +109,9 @@ public:
   //! Copy-assign operator
   sum_type& operator= (sum_type const& other);
 
+  //! Move-assign operator
+  sum_type& operator= (sum_type&& other);
+
   //! `match` function, `const` overoad
   template <class R, class... Fs> R match(Fs&&... fs) const;
   //! `match` function, non-`const` overoad
@@ -92,25 +121,32 @@ public:
   //! `match` procedure, non-`const` overoad
   template <class... Fs> void match(Fs&&... fs);
 
+  //! The currently active type is `i`?
+  template<std::size_t I>
+  constexpr bool is_type_at () const;
+
 };
 
 //! \cond
 
 template <class... Ts>
 sum_type<Ts...>::sum_type (sum_type const& other) : cons (other.cons) {
+  //std::cout << "sum_type::sum_type (sum_type const &)\n";
   data.copy (cons, other.data);
 }
 
 template <class... Ts>
 sum_type<Ts...>::sum_type (sum_type&& other) : cons (other.cons) {
+  //std::cout << "sum_type::sum_type (sum_type&&)\n";
   data.move (cons, std::move (other.data));
 }
 
 template <class... Ts>
   template <class T, class... Args>
   sum_type<Ts...>::sum_type (constructor<T> t, Args&&... args)
-  : data (t, std::forward<Args>(args)...), cons (index_of<T, Ts...>::value)
-{}
+  : data (t, std::forward<Args>(args)...), cons (index_of<T, Ts...>::value){
+  //std::cout << "sum_type<Ts...>::sum_type (constructor<T> t, Args&&... args)\n";
+}
 
 template <class... Ts>
 sum_type<Ts...>::~sum_type() {
@@ -122,9 +158,21 @@ sum_type<Ts...>& sum_type<Ts...>::operator= (sum_type const& other) {
   if (std::addressof (other) == this)
     return *this;
 
-  data.destruct (const);
-  cons = s.cons;
-  data.copy (cons, s.data);
+  data.destruct (cons);
+  cons = other.cons;
+  data.copy (cons, other.data);
+
+  return *this;
+}
+
+template <class... Ts>
+sum_type<Ts...>& sum_type<Ts...>::operator= (sum_type&& other) {
+  if (std::addressof (other) == this)
+    return *this;
+
+  data.destruct (cons);
+  cons = other.cons;
+  data.move (cons, std::move (other.data));
 
   return *this;
 }
@@ -162,6 +210,12 @@ void sum_type<Ts...>::match(Fs&&... fs) {
    
   union_visitor<void, indicies, Ts...>::visit (
                 data, cons, std::forward<Fs>(fs)...);
+}
+
+template <class... Ts>
+  template <std::size_t I>
+constexpr bool sum_type<Ts...>::is_type_at () const {
+  return cons == I;
 }
 
 //! \endcond
