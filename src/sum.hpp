@@ -1,24 +1,11 @@
 #if !defined(SUM_F8718480_DC1C_4410_84C0_DDDA2C2FED94_H)
 #  define SUM_F8718480_DC1C_4410_84C0_DDDA2C2FED94_H
-//! \mainpage
-//!
-//! \section abstract Abstract
-//!
-//! A library implementing a "pretty good sum type".
-//!
-//! \image html prettygood.png
-//!
+
 //! \file sum.hpp
 //!
-//! \brief Contains the definition of the (pretty good) `sum_type`
-//!
-//! \details A type for modeling "sums with constructors" as used in the
-//! (algebraic datatype concepts of the) functional approach to
-//! programming.
-
-//! \file sum_type.hpp
 //! \copyright Copyright (c) 2013 Björn Aili
 //! \copyright Copyright Shayne Fletcher, 2015
+
 /*
  * Copyright (c) 2013 Björn Aili
  *
@@ -41,12 +28,33 @@
  * 3. This notice may not be removed or altered from any source
  * distribution.
  */
+
+//! \mainpage
+//!
+//! \section abstract Abstract
+//!
+//! A library implementing a "pretty good sum type".
+//!
+//! \image html prettygood.png
+//!
+//! \file sum.hpp
+//!
+//! \brief Contains the definition of the (pretty good) `sum_type`
+//!
+//! \details A type for modeling "sums with constructors" as used in the
+//! (algebraic datatype concepts of the) functional approach to
+//! programming.
+
 #  include "recursive_union.hpp"
 
 #  include <cstddef>
 #  include <iostream>
 
 namespace pgs {
+
+//! \cond
+template <class... Ts> class sum_type;//fwd. decl
+//! \endcond
 
 //! \cond
 namespace detail {
@@ -69,6 +77,45 @@ namespace detail {
     static auto const value = index_of_impl<I + 1, X, Ts...>::value;
   };
 
+  template <std::size_t I, class T, class... Ts>
+  struct type_at_impl : type_at_impl<I - 1, Ts...>
+  {};
+
+  template <class T, class... Ts>
+  struct type_at_impl<0, T, Ts...> {
+    using type = T;
+  };
+
+  template <std::size_t I, class... Ts>
+  struct get_sum_type_element {
+
+    static auto get (sum_type<Ts...>& u) -> decltype(recursive_union_indexer<I,Ts...>::ref(u.data)) {
+      if (u.cons != I){
+        std::string message;
+        message += "Indexing with ";
+        message += std::to_string (I);
+        message += ", but the active index is ";
+        message += std::to_string (u.cons);
+
+        throw invalid_sum_type_access{message};
+      }
+      return recursive_union_indexer<I, Ts...>::ref (u.data);
+    }
+
+    static auto get (sum_type<Ts...> const& u) -> decltype(recursive_union_indexer<I,Ts...>::ref(u.data)) {
+      if (u.cons != I){
+        std::string message;
+        message += "Indexing with ";
+        message += std::to_string (I);
+        message += ", but the active index is ";
+        message += std::to_string (u.cons);
+
+        throw invalid_sum_type_access{message};
+      }
+      return recursive_union_indexer<I, Ts...>::ref (u.data);
+    }
+  };
+
 }//namespace detail
 //! \endcond
 
@@ -80,8 +127,13 @@ namespace detail {
 
 template <class T, class... Ts>
 struct index_of {
-  static auto const value = detail::index_of_impl<0u, T, Ts...>::value;
+  static constexpr auto const value = detail::index_of_impl<0u, T, Ts...>::value;
 };
+
+//! \brief Get the type at a given index in a variadic type list
+
+template <std::size_t I,  class... Ts>
+using type_at = typename detail::type_at_impl<I, Ts...>::type;
 
 //! \class sum_type
 //!
@@ -93,6 +145,10 @@ class sum_type {
 private:
   std::size_t cons;
   recursive_union<Ts...> data;
+
+private:
+  template <std::size_t I, class... Us>
+  friend struct detail::get_sum_type_element;
   
 public:
 
@@ -121,10 +177,9 @@ public:
   //! `match` procedure, non-`const` overoad
   template <class... Fs> void match(Fs&&... fs);
 
-  //! The currently active type is `i`?
+  //! The currently active `v` is at position `I`?
   template<std::size_t I>
-  constexpr bool is_type_at () const;
-
+  constexpr bool is_type_at () const noexcept;
 };
 
 //! \cond
@@ -214,10 +269,32 @@ void sum_type<Ts...>::match(Fs&&... fs) {
 
 template <class... Ts>
   template <std::size_t I>
-constexpr bool sum_type<Ts...>::is_type_at () const {
+constexpr bool sum_type<Ts...>::is_type_at () const noexcept {
   return cons == I;
 }
 
+//! \endcond
+
+//! \brief Attempt to get at the value contained in a sum
+
+template <std::size_t I, class... Ts>
+constexpr type_at<I, Ts...>& get (sum_type<Ts...>& s);
+
+//! \brief Attempt to get at the value contained in a sum
+
+template <std::size_t I, class... Ts>
+constexpr type_at<I, Ts...> const& get (sum_type<Ts...> const& s);
+
+//! \cond
+template <std::size_t I, class... Ts>
+inline constexpr type_at<I, Ts...>& get (sum_type<Ts...>& s) {
+  return detail::get_sum_type_element<I, Ts...>::get (s);
+}
+
+template <std::size_t I, class... Ts>
+inline constexpr type_at<I, Ts...> const& get (sum_type<Ts...> const& s) {
+  return detail::get_sum_type_element<I, Ts...>::get (s);
+}
 //! \endcond
 
 }//namespace pgs

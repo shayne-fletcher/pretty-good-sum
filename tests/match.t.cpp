@@ -2,6 +2,7 @@
 
 #include "sum.hpp"
 
+namespace {
 struct E_const;
 struct E_add;
 struct E_sub;
@@ -43,19 +44,21 @@ struct E_div {
   {}
 };
 
-std::ostream& operator << (std::ostream& os, xpr_t const& e) {
+int eval (xpr_t const& e) {
 
-  return e.match<std::ostream&> (
-    [&](E_const const& e) -> auto& { return os << e.i;  },
-    [&](E_mul const& e) -> auto& { return os << e.l << "*" << e.r;  },
-    [&](E_div const& e)-> auto&  { return os << e.l << "/" << e.r;  },
-    [&](E_add const& e) -> auto& { return os << "(" << e.l << " + " << e.r << ")"; },
-    [&](E_sub const& e) -> auto& { return os << "(" << e.l << " - " << e.r << ")"; }
+  return e.match<int> (
+    [&](E_const const& e) -> auto { return e.i;  },
+    [&](E_mul const& e) -> auto { return eval (e.l) * eval (e.r); },
+    [&](E_div const& e)-> auto  { return eval (e.l) / eval (e.r); },
+    [&](E_add const& e) -> auto { return eval (e.l) + eval (e.r); },
+    [&](E_sub const& e) -> auto { return eval (e.l) - eval (e.r); }
    );
 
 }
 
-TEST (pgs, breathing) {
+}//namespace<anonymous>
+
+TEST (pgs, match) {
 
   //n=2 + 3
   xpr_t n{
@@ -68,8 +71,6 @@ TEST (pgs, breathing) {
   //xpr = (2 + 3)/5
   xpr_t xpr = xpr_t{pgs::constructor<E_div>{}, n, d};
 
-  //print
-  std::ostringstream os;
-  os << xpr;
-  ASSERT_EQ (os.str (), std::string {"(2 + 3)/5"});
+  //eval!
+  ASSERT_EQ (eval (xpr), 1);
 }
