@@ -3,7 +3,7 @@
 
 //! \file sum.hpp
 //!
-//! \copyright Copyright (c) 2013 Björn Aili
+//! \copyright Copyright Björn Aili, 2013
 //! \copyright Copyright Shayne Fletcher, 2015
 
 /*
