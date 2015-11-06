@@ -2,7 +2,7 @@
 
 Pretty good sum type library implementing a modern C++ sum type.
 
-![Image of Larry](https://bbgithub.dev.bloomberg.com/sfletche/pretty-good-sum/blob/master/images/prettygood.png)
+![Image of Larry](/images/prettygood.png)
 
 A CMake build solution is provided, googletest is required. You can
 get a variety of builds with layout and naming conventions expected by
