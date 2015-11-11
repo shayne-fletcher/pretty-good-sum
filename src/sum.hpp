@@ -83,7 +83,7 @@ namespace detail {
 
   template <class T, class... Ts>
   struct type_at_impl<0, T, Ts...> {
-    using type = T;
+    using type = unwrap_recursive_wrapper_t<T>;
   };
 
   template <std::size_t I, class... Ts>

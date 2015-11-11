@@ -28,6 +28,51 @@ namespace pgs {
 
   template <class T> struct overload_tag {};
 
+  template <bool is_recursive_wrapper, class T, class... Ts>
+  struct recursive_union_dereference; 
+
+  template <class T, class... Ts>
+  struct recursive_union_dereference<false, T, Ts...> {
+
+    static constexpr T& ref (recursive_union<T, Ts...>& u) {
+      return u.v;
+    }
+
+    static constexpr T const& ref (recursive_union<T, Ts...> const& u) {
+      return u.v;
+    }
+
+    static constexpr T* ptr (recursive_union<T, Ts...>& u) {
+      return std::addressof (u.v);
+    }
+
+    static constexpr T const* ptr (recursive_union<T, Ts...> const& u) {
+      return std::addressof (u.v);
+    }
+  };
+
+  template <class T, class... Ts>
+  struct recursive_union_dereference<true, T, Ts...> {
+
+    using type = unwrap_recursive_wrapper_t<T>;
+
+    static type& ref (recursive_union<T, Ts...>& u) {
+    return u.v.get ();
+    }
+
+    static type const& ref (recursive_union<T, Ts...> const& u) {
+      return u.v.get ();
+    }
+
+    static constexpr type* ptr (recursive_union<T, Ts...>& u) {
+      return std::addressof (u.v.get ());
+    }
+
+    static constexpr T const* ptr (recursive_union<T, Ts...> const& u) {
+      return std::addressof (u.v.get ());
+    }
+  };
+
   template<std::size_t I, class T, class... Ts>
   struct recursive_union_indexer {
 
@@ -48,22 +93,24 @@ namespace pgs {
   template <class T, class... Ts>
   struct recursive_union_indexer<0, T, Ts...> {
 
-    static constexpr T& ref (recursive_union<T, Ts...>& u) {
-      return u.v;
+    static constexpr auto& ref (recursive_union<T, Ts...>& u) {
+      return recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u);
     }
 
-    static constexpr T const& ref (recursive_union<T, Ts...> const& u) {
-      return u.v;
+    static constexpr auto const& ref (recursive_union<T, Ts...> const& u) {
+      return recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u);
     }
 
-    static constexpr T* ptr (recursive_union<T, Ts...>& u) {
-      return std::addressof (u.v);
+    static constexpr auto* ptr (recursive_union<T, Ts...>& u) {
+      return std::addressof (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u));
     }
 
-    static constexpr T const* ptr (recursive_union<T, Ts...> const& u) {
-      return std::addressof (u.v);
+    static constexpr auto const* ptr (recursive_union<T, Ts...> const& u) {
+      return std::addressof (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u));
     }
+
   };
+
 
   //! \brief Primary template
   //!
