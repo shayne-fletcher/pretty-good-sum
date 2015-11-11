@@ -31,31 +31,35 @@ namespace pgs {
   template<std::size_t I, class T, class... Ts>
   struct recursive_union_indexer {
 
-    static constexpr auto ref (recursive_union<T, Ts...>& u) {
-      return union_indexer<I - 1, Ts...>::ref (u.r);
+    static constexpr auto& ref (recursive_union<T, Ts...>& u) {
+      return recursive_union_indexer<I - 1, Ts...>::ref (u.r);
     }
-    static constexpr auto ref (recursive_union<T, Ts...> const& u) {
-      return union_indexer<I - 1, Ts...>::ref (u.r);
+    static constexpr auto const& ref (recursive_union<T, Ts...> const& u) {
+      return recursive_union_indexer<I - 1, Ts...>::ref (u.r);
     }
-    static constexpr auto ptr (recursive_union<T, Ts...>& u) {
-      return union_indexer<I - 1, Ts...>::ptr (u.r);
+    static constexpr auto* ptr (recursive_union<T, Ts...>& u) {
+      return recursive_union_indexer<I - 1, Ts...>::ptr (u.r);
     }
-    static constexpr auto ptr (recursive_union<T, Ts...> const& u) {
-      return union_indexer<I - 1, Ts...>::ptr (u.r);
+    static constexpr auto const* ptr (recursive_union<T, Ts...> const& u) {
+      return recursive_union_indexer<I - 1, Ts...>::ptr (u.r);
     }
   };
 
   template <class T, class... Ts>
   struct recursive_union_indexer<0, T, Ts...> {
+
     static constexpr T& ref (recursive_union<T, Ts...>& u) {
       return u.v;
     }
+
     static constexpr T const& ref (recursive_union<T, Ts...> const& u) {
       return u.v;
     }
+
     static constexpr T* ptr (recursive_union<T, Ts...>& u) {
       return std::addressof (u.v);
     }
+
     static constexpr T const* ptr (recursive_union<T, Ts...> const& u) {
       return std::addressof (u.v);
     }

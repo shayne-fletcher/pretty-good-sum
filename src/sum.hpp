@@ -89,7 +89,7 @@ namespace detail {
   template <std::size_t I, class... Ts>
   struct get_sum_type_element {
 
-    static auto get (sum_type<Ts...>& u) -> decltype(recursive_union_indexer<I,Ts...>::ref(u.data)) {
+    static auto& get (sum_type<Ts...>& u) {
       if (u.cons != I){
         std::string message;
         message += "Indexing with ";
@@ -102,7 +102,7 @@ namespace detail {
       return recursive_union_indexer<I, Ts...>::ref (u.data);
     }
 
-    static auto get (sum_type<Ts...> const& u) -> decltype(recursive_union_indexer<I,Ts...>::ref(u.data)) {
+    static auto const& get (sum_type<Ts...> const& u) {
       if (u.cons != I){
         std::string message;
         message += "Indexing with ";

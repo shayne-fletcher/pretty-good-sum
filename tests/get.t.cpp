@@ -38,6 +38,12 @@ TEST (pgs, get) {
      , list<int>{constructor<nil<int>>{}}
   };
 
+  recursive_wrapper<cons<int>> const& m = get<0> (l);
+
   //Todo : Make 'get' work seamlessly with recursive wrappers.
   ASSERT_EQ (get<0> (l).get ().hd, 1);
+
+  ASSERT_THROW(get<1> (l), invalid_sum_type_access);
+
+  ASSERT_NO_THROW(get<1>(list<int>{constructor<nil<int>>{}}));
 }
