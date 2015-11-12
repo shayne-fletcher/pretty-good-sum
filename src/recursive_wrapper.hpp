@@ -23,14 +23,12 @@ class recursive_wrapper; //fwd. decl.
 //!
 //! \returns Type equivalent to one of `std::true_type` or
 //! `std::false_type`
-
 template <class T> 
 struct is_recursive_wrapper : std::false_type 
 {};
 
 //! \brief Partial specialization for types that are recursive
 //! wrappers
-
 template <class T> 
 struct is_recursive_wrapper<recursive_wrapper<T>> : std::true_type 
 {};
@@ -39,30 +37,29 @@ struct is_recursive_wrapper<recursive_wrapper<T>> : std::true_type
 //! contained by a `recursive_wrapper<>`.
 //
 //! \returns `T` if `T` is not a `recursive_wrapper<>` else `T::type`
-
 template <class T>
-struct unwrap_recursive_wrapper {
-  typedef T type;
+struct recursive_wrapper_unwrap {
+  typedef T type; //!< For `T` not a recursive wrapper
 };
 
 //! \brief Partial specialization for types that are recursive
 //! wrappers
-
 template <class T>
-struct unwrap_recursive_wrapper<recursive_wrapper<T>> {
-  typedef T type;
+struct recursive_wrapper_unwrap<recursive_wrapper<T>> {
+  typedef T type; //!< The type of the value contained by a recursive
+                  //!wrapper
 };
 
-//! \brief Alias template for the result of `unwrap_recursive_wrapper<>`.
-
+//! \brief Alias template for the result of
+//! `recursive_wrapper_unwrap<>`.
 template <class W>
-using unwrap_recursive_wrapper_t = typename unwrap_recursive_wrapper<W>::type;
+using recursive_wrapper_unwrap_t = 
+  typename recursive_wrapper_unwrap<W>::type;
 
 //! \class recursive_wrapper<>
 //!
 //! \brief A type to enable working around the absence of recursive
 //! types
-
 template <class T>
 class recursive_wrapper {
 private:

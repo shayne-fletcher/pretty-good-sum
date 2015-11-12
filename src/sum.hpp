@@ -83,7 +83,7 @@ namespace detail {
 
   template <class T, class... Ts>
   struct type_at_impl<0, T, Ts...> {
-    using type = unwrap_recursive_wrapper_t<T>;
+    using type = recursive_wrapper_unwrap_t<T>;
   };
 
   template <std::size_t I, class... Ts>
@@ -236,7 +236,7 @@ template<class... Ts>
   template <class R, class... Fs>
 R sum_type<Ts...>::match(Fs&&... fs) const {
   using indicies = range_t<0, sizeof... (Ts) - 1>;
-  return union_visitor<R, indicies, Ts...>::visit (
+  return recursive_union_visitor<R, indicies, Ts...>::visit (
                data, cons, std::forward<Fs>(fs)...);
 }
 
@@ -245,7 +245,7 @@ template<class... Ts>
 R sum_type<Ts...>::match(Fs&&... fs) {
   using indicies = range_t<0, sizeof... (Ts) - 1>;
 
-  return union_visitor<R, indicies, Ts...>::visit (
+  return recursive_union_visitor<R, indicies, Ts...>::visit (
                 data, cons, std::forward<Fs>(fs)...);
 }
 
@@ -254,7 +254,7 @@ template<class... Ts>
 void sum_type<Ts...>::match(Fs&&... fs) const {
   using indicies = range_t<0, sizeof... (Ts) - 1>;
 
-  union_visitor<void, indicies, Ts...>::visit (
+  recursive_union_visitor<void, indicies, Ts...>::visit (
                 data, cons, std::forward<Fs>(fs)...);
 }
 
@@ -263,7 +263,7 @@ template<class... Ts>
 void sum_type<Ts...>::match(Fs&&... fs) {
   using indicies = range_t<0, sizeof... (Ts) - 1>;
    
-  union_visitor<void, indicies, Ts...>::visit (
+  recursive_union_visitor<void, indicies, Ts...>::visit (
                 data, cons, std::forward<Fs>(fs)...);
 }
 
