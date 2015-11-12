@@ -345,8 +345,7 @@ namespace pgs {
   //! The role of this visitor is to "walk" the recursive union until
   //! the active type is reached. When it is, the form of visit that
   //! searches for the right closure to apply to the value there is
-  //! invoked (see \ref recursive_union_visitor_find_applicable_closure1 "recursive union visitor for finding a matching closure")
-  //!
+  //! invoked (see \ref recursive_union_visitor_find_applicable_closure1 "recurs  //!
   //! \tparam R result type
   //! \tparam I Head of an integer pack
   //! \tparam I Tail of an integer pack
