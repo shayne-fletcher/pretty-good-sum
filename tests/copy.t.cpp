@@ -16,12 +16,7 @@ namespace {
     T hd;
     list<T> tl;
   
-    template <
-      class U, class V
-      , class = std::enable_if_t<
-          and_<std::is_same<list<T>, std::remove_reference_t<V>>
-               , std::is_same<T, std::remove_reference_t<U>>>::value>
-      >
+    template <class U, class V>
     cons (U&& hd, V&& tl) :
       hd (std::forward<U> (hd)), tl (std::forward<V>(tl)) {
     }
