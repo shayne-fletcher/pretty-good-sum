@@ -130,12 +130,11 @@ namespace pgs {
     }
   };
 
-
   //! \brief Primary template
   //!
   //! \anchor recursive_union_visitor_find_applicable_closure1
   //!
-  //! \tparam R result type
+  //! \tparam R return type
   //! \tparam T head of the parameter pack
   //! \tparam Ts tail of the paramter pack
   //!
@@ -146,8 +145,9 @@ namespace pgs {
   template <class R, class T, class... Ts>
   struct recursive_union_visitor {
 
-    using result_type = R; //result type of 'visit'
+    using result_type = R; //!< The return type of `visit`
 
+    //! \brief `f` is callable on `t` (of type `T const&`)
     template <
       class O, class F, class... Fs,
       class = typename std::enable_if<is_callable<F, T>::value>::type
@@ -155,7 +155,8 @@ namespace pgs {
     static result_type visit (overload_tag<O>, T const& t, F&& f, Fs&&...) {
       return std::forward<F>(f)(t);
     }
-
+    //! \brief `f` is not callable on `t` (of type `T const&`),
+    //! recurse
     template <
       class F, class O, class... Fs,
       class = typename std::enable_if<!is_callable<F, T>::value>::type
@@ -163,7 +164,7 @@ namespace pgs {
     static result_type visit (overload_tag<O> o, T const& t, F&&, Fs&&... fs) {
       return recursive_union_visitor::visit (o, t, std::forward<Fs>(fs)...);
     }
-
+    //! \brief `f` is callable on `t` (of type `T&`)
     template <
       class O, class F, class... Fs,
       class = typename std::enable_if<is_callable<F, T>::value>::type
@@ -171,7 +172,7 @@ namespace pgs {
     static result_type visit (overload_tag<O>, T& t, F&& f, Fs&&...) {
       return std::forward<F>(f)(t);
     }
-
+    //! \brief `f` is not callable on `t` (of type `T&`)
     template <
       class F, class O, class... Fs,
       class = typename std::enable_if<!is_callable<F, T>::value>::type
@@ -181,7 +182,7 @@ namespace pgs {
     }
   };
 
-  //! \brief Partial specialization for `void` result type
+  //! \brief Partial specialization for `void` return type
   //!
   //! \anchor recursive_union_visitor_find_applicable_closure2
   //!
@@ -192,7 +193,7 @@ namespace pgs {
   template <class T, class... Ts>
   struct recursive_union_visitor<void, T, Ts...> {
 
-    using result_type = void;//result type of 'visit'
+    using result_type = void;//!< return type of `visit`
 
     //! \brief `f` is callable on `t` (of type `T const&`)
     template <
@@ -202,7 +203,6 @@ namespace pgs {
     static result_type visit (overload_tag<O>, T const& t, F&& f, Fs&&...) {
       std::forward<F>(f)(t);
     }
-
     //! \brief `f` is not callable on `t` (of type `T const&`),
     //! recurse
     template <
@@ -212,7 +212,6 @@ namespace pgs {
     static result_type visit (overload_tag<O> o, T const& t, F&&, Fs&&... fs) {
       recursive_union_visitor::visit (o, t, std::forward<Fs>(fs)...);
     }
-
     //! \brief `f` is callable on `t` (of type `T&`)
     template <
       class O, class F, class... Fs,
@@ -221,8 +220,7 @@ namespace pgs {
     static result_type visit (overload_tag<O>, T& t, F&& f, Fs&&...) {
       std::forward<F>(f)(t);
     }
-
-    //! \brief `f` is not callable on `t` (of type `T const &`)
+    //! \brief `f` is not callable on `t` (of type `T&`)
     template <
       class F, class O, class... Fs,
       class = typename std::enable_if<!is_callable<F, T>::value>::type
@@ -275,14 +273,14 @@ namespace pgs {
 
   //! \brief Partial specialization
   //!
-  //! \tparam R result type
+  //! \tparam R return type
   //! \tparam Ts Paramter pack
   //!
-  //! Base case for result type is `R`
+  //! Base case for return type is `R`
   template <class R, class... Ts>
   struct recursive_union_visitor<R, range<>, Ts...> {
   
-    using result_type = R;//result type of 'visit'
+    using result_type = R;//!< The return type of `visit`
   
     //! \brief This definition applies when `Ts...` is empty
     //! \brief Calls to this function always throw.
@@ -308,14 +306,14 @@ namespace pgs {
   //!
   //!
   //!
-  //! \tparam R result type
+  //! \tparam R return type
   //! \tparam Ts Paramter pack
   //!
-  //! Base case for result type is `void`
+  //! Base case for return type is `void`
   template <class... Ts>
   struct recursive_union_visitor<void, range<>, Ts...> {
   
-    using result_type = void;//the result 'visit'
+    using result_type = void;//!< The return type of `visit`
   
     //! \brief This definition applies when `Ts...` is empty
     //! \brief Calls to this function always throw.
@@ -346,20 +344,20 @@ namespace pgs {
   //! the active type is reached. When it is, the form of visit that
   //! searches for the right closure to apply to the value there is
   //! invoked (see \ref recursive_union_visitor_find_applicable_closure1 "recurs  //!
-  //! \tparam R result type
+  //! \tparam R return type
   //! \tparam I Head of an integer pack
   //! \tparam I Tail of an integer pack
   //! \tparam T Head of the parameter pack (of union types)
   //! \tparam Ts Tail of the parameter pack (of union types)
   //!
-  //! Result type is `R`, `range<>` is non-empty. This specialization
+  //! return type is `R`, `range<>` is non-empty. This specialization
   //! applies when the head of the parameter pack is not a
   //! `reference_wrapper<>`
   template <class R, std::size_t I, std::size_t... Is, class T, class... Ts>
   struct recursive_union_visitor<R, range<I, Is...>, T, Ts...> {
   
-    using type = T; //the type of the value
-    using result_type = R; //result type of 'visit'
+    using type = T; //!< The type of the value
+    using result_type = R; //!< The return type of `visit`
   
     //! \brief `const` overload (`recursive_union<type, Ts...> const&`)
     template <class... Fs>
@@ -403,21 +401,21 @@ namespace pgs {
   //! searches for the right closure to apply to the value there is
   //! invoked (see \ref recursive_union_visitor_find_applicable_closure1 "recursive union visitor for finding a matching closure")
   //!
-  //! \tparam R result type
+  //! \tparam R return type
   //! \tparam I Head of an integer pack
   //! \tparam I Tail of an integer pack
   //! \tparam T Head of the parameter pack
   //! \tparam Ts Tail of the parameter pack (of union types)
   //! 
-  //! Result type is `R`, `range<>` is non-empty. This specialization
+  //! return type is `R`, `range<>` is non-empty. This specialization
   //! applies when the head of the parameter pack is a
   //! `recursive_wrapper<>`
   template <class R, std::size_t I, std::size_t... Is, class T, class... Ts>
   struct recursive_union_visitor<R, range<I, Is...>, recursive_wrapper<T>, Ts...> {
   
-    using type = T; //the type held by the value
-    using U = recursive_wrapper<type>;//the type of the value
-    using result_type = R;//the type returned by 'visit'
+    using type = T; //!< The type held by the value
+    using U = recursive_wrapper<type>;//!< The type of the value
+    using result_type = R; //!< The type returned by `visit`
     
     //! \brief `const` overload (`recursive_union<U, Ts...> const&`)
     template <class... Fs>
@@ -466,14 +464,14 @@ namespace pgs {
   //! \tparam T Head of the parameter pack
   //! \tparam Ts Tail of the parameter pack (of union types)
   //!
-  //! Result type is `void`, `range<>` is non-empty.! This specialization
+  //! return type is `void`, `range<>` is non-empty.! This specialization
   //! applies when the head of the parameter pack is not a
   //! `recursive_wrapper<>`
   template <std::size_t I, std::size_t... Is, class T, class... Ts>
   struct recursive_union_visitor<void, range<I, Is...>, T, Ts...> {
   
-    using type = T; //the type of the value
-    using result_type = void; //result type of 'visit'
+    using type = T; //!< The type of the value
+    using result_type = void; //!< The return type of `visit`
   
     //! \brief 'const' overload ('recursive_union<type, Ts...> const& u')
     template <class... Fs>
@@ -481,7 +479,7 @@ namespace pgs {
     visit (
       recursive_union<type, Ts...> const& u, std::size_t i, Fs&&... fs) {
       if (i == I) {
-        //'u' is not a reference (no call 'get ()')
+        //'u' is not a wrapper (no call 'get ()')
         overload_tag<type> o{};
         recursive_union_visitor<result_type, type>::visit(
                                               o, u.v, std::forward<Fs>(fs)...);
@@ -498,7 +496,7 @@ namespace pgs {
     visit (
       recursive_union<T, Ts...>& u, std::size_t i, Fs&&... fs) {
       if (i == I) {
-        //'u' is not a reference (no call 'get ()')
+        //'u' is not a wrapper (no call 'get ()')
         overload_tag<type> o{};
         recursive_union_visitor<result_type, type>::visit(
                                               o, u.v, std::forward<Fs>(fs)...);
@@ -525,16 +523,18 @@ namespace pgs {
   //! \tparam T Head of the parameter pack
   //! \tparam Ts Tail of the parameter pack (of union types)
   //!
-  //! Result type is `void`, `range<>` is non-empty. This specialization
+  //! return type is `void`, `range<>` is non-empty. This specialization
   //! applies when the head of the parameter pack is a
   //! `recursive_wrapper<>`
   template <std::size_t I, std::size_t... Is, class T, class... Ts>
-  struct recursive_union_visitor<void, range<I, Is...>, recursive_wrapper<T>, Ts...> {
+  struct recursive_union_visitor<
+     void, range<I, Is...>, recursive_wrapper<T>, Ts...> {
+
     //U='recursive_wrapper<T>', 'Ts', return type 'void'
   
-    using type = T; //the type held by the value
-    using U = recursive_wrapper<type>;//the type of the value
-    using result_type = void;//the type returned by 'visit'
+    using type = T; //!< The type held by the value
+    using U = recursive_wrapper<type>;//!< The type of the value
+    using result_type = void;//!< The type returned by `visit`
   
     //! \brief `const` overload (`recursive_union<U, Ts...> const&`)
     template <class... Fs>
@@ -570,11 +570,18 @@ namespace pgs {
   };
   
   //! \brief Full specialization
+  //! 
+  //! This specialization applies when there are no more "cases" in
+  //! the sum
   template <>
   struct recursive_union<> {
+    //! \brief `copy` is a no-op
     void copy (std::size_t, recursive_union const&) {}
+    //! \brief `move` is a no-op
     void move (std::size_t, recursive_union&&) {}
+    //! \brief `destruct` is a no-op
     void destruct (std::size_t) {}
+    //! \brief `compare` returns `false`
     bool compare (std::size_t, recursive_union const&) const { return false; }
   };
   
@@ -587,17 +594,14 @@ namespace pgs {
   //!
   //! \tparam T Type of `v` in the union
   //! \tparam Ts `recursive_union<Ts...>` is the type of `r` in the union
-
   template <class T, class... Ts>
   struct recursive_union<T, Ts...> {
   
     //! \brief Default ctor
-
     recursive_union () 
     {}
   
     //! \brief Construct (a `T`) into `v`
-
     template <class... Args>
     explicit recursive_union (constructor<T>, Args&&... args) 
       : v (std::forward<Args>(args)...)
@@ -605,9 +609,8 @@ namespace pgs {
   
     //! \brief Construct (a `recursive_wrapper<T>`) into `v`
     //!
-    //! \details `U` is not `T` but `T` is a recursive wrapper and `U`
+    //! `U` is not `T` but `T` is a recursive wrapper and `U`
     //! is the type contained in `T`
-
     template <class U, class... Args,
     std::enable_if_t<
        and_<
@@ -621,9 +624,8 @@ namespace pgs {
   
     //! \brief Construct into `r`
     //!
-    //! \details `U` is not `T` and `T` is not a recursive wrapper or,
+    //! `U` is not `T` and `T` is not a recursive wrapper or,
     //! `U` is not the type contained in `T`
-
     template <class U, class... Args,
     std::enable_if_t<
       !and_<
@@ -631,24 +633,24 @@ namespace pgs {
       , std::is_same<U, recursive_wrapper_unwrap_t<T>>>::value, int> = 0
     >
     explicit recursive_union (constructor<U> t, Args&&... args)
-      noexcept(std::is_nothrow_constructible<Ts..., constructor<U>, Args...>::value)
+      noexcept(
+         std::is_nothrow_constructible<Ts..., constructor<U>, Args...>::value
+      )
       : r (t, std::forward<Args>(args)...)
     {}
   
     //! \brief Dtor
-
     ~recursive_union () 
     {}
   
     //! \brief Copy
     //!
-    //! \details If `i` is \f$0\f$ then emplace copy-construct `v`
+    //! If `i` is \f$0\f$ then emplace copy-construct `v`
     //! from `u.v` else, recursively invoke `copy` on `r` and a
     //! decremented `i`.
     //!
     //! \param i When zero, the destination of the copy
     //! \param u Source of the copy
-
     void copy (std::size_t i, recursive_union const& u)
       noexcept(
        std::is_nothrow_copy_constructible<T>::value
@@ -665,17 +667,17 @@ namespace pgs {
   
     //! \brief Move
     //!
-    //! \details If `i` is \f$0\f$ then emplace move-construct `v`
+    //! If `i` is \f$0\f$ then emplace move-construct `v`
     //! from `u.v` else, recursively invoke `move` on `r` and a
     //! decremented `i`.
     //!
     //! \param i When zero, the destination of the move
     //! \param u Source of the move
-
     void move (std::size_t i, recursive_union&& u) 
       noexcept (
         std::is_nothrow_move_constructible<T>::value
-       && noexcept (std::declval<recursive_union>().r.move (i - 1, std::move (u.r)))
+       && noexcept (std::declval<recursive_union>().r.move (
+                                                  i - 1, std::move (u.r)))
        ) {
       //std::cout << "recursive_union.move ()\n";
       if (i == 0) {
@@ -688,11 +690,10 @@ namespace pgs {
   
     //! \brief Destruct
     //!
-    //! \details If `i` is \f$0\f$ then destruct `v` else, recursively
-    //!  invoke `destruct` on `r` and a decremented `i`.
+    //! If `i` is \f$0\f$ then destruct `v` else, recursively invoke
+    //! `destruct` on `r` and a decremented `i`.
     //!
     //! \param i When zero, the destination of the destruction
-
     void destruct (std::size_t i)
       noexcept (std::is_nothrow_destructible<T>::value 
        && noexcept (std::declval<recursive_union>().r.destruct (i - 1))) {
@@ -706,26 +707,24 @@ namespace pgs {
   
     //! \brief Equality comparison
     //!
-    //!
-    //! \details If `i` is \f$0\f$ then compare `v` against `rhs.v`
-    //!  else, recursively invoke `compare` on `r` and a decremented
-    //!  `i`.
+    //! If `i` is \f$0\f$ then compare `v` against `rhs.v` else,
+    //!  recursively invoke `compare` on `r` and a decremented `i`.
     //!
     //! \param i When zero, indicates the LHS object of the
     //! comparision
     //! \param rhs The value to compare the LHS against
-
     bool compare (size_t i, recursive_union const& rhs) const 
       noexcept {
       return i == 0 ? v == rhs.v : r.compare (i - 1, rhs.r);
     }
   
-    //! \brief An anonymous (smart) union
-    //! \details An anonymous union consisting of a field `v` of type
-    //! `T` and a field `r` of type `recursive_union<Ts...>`
+    //! \brief An anonymous union
+    //!
+    //! An anonymous union consisting of a field `v` of type `T` and a
+    //! field `r` of type `recursive_union<Ts...>`
     union {
       T v; //!< Value or...
-      recursive_union<Ts...> r; //< ... recursive union
+      recursive_union<Ts...> r; //!< ... recursive union
     };
   };
   

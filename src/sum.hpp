@@ -124,14 +124,14 @@ namespace detail {
 //!
 //! \tparam T The type for which we desire its index in `Ts`
 //! \tparam Ts A parameter pack containing `T`
-
 template <class T, class... Ts>
 struct index_of {
-  static constexpr auto const value = detail::index_of_impl<0u, T, Ts...>::value;
+  //!\brief The index of `T` in `Ts...`
+  static constexpr auto const value = 
+    detail::index_of_impl<0u, T, Ts...>::value;
 };
 
 //! \brief Get the type at a given index in a variadic type list
-
 template <std::size_t I,  class... Ts>
 using type_at = typename detail::type_at_impl<I, Ts...>::type;
 
@@ -139,7 +139,6 @@ using type_at = typename detail::type_at_impl<I, Ts...>::type;
 //!
 //! \brief A type modeling "sums with constructors" as used in
 //! functional programming
-
 template <class... Ts>
 class sum_type {
 private:
@@ -183,7 +182,6 @@ public:
 };
 
 //! \cond
-
 template <class... Ts>
 sum_type<Ts...>::sum_type (sum_type const& other) : cons (other.cons) {
   //std::cout << "sum_type::sum_type (sum_type const &)\n";
@@ -272,7 +270,6 @@ template <class... Ts>
 constexpr bool sum_type<Ts...>::is_type_at () const noexcept {
   return cons == I;
 }
-
 //! \endcond
 
 //! \brief Attempt to get at the value contained in a sum
