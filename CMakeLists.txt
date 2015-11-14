@@ -48,6 +48,7 @@ SET(PGS_TESTS_CPP
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/breathing.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/match.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/get.t.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/list.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/move.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/copy.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/main.t.cpp

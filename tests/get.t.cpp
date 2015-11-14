@@ -23,18 +23,19 @@ namespace {
 
   };
 
+  template <class T>
+  inline list<T> nil () {
+    return list<T>{constructor<nil_t<T>>{}};
+  }
+
+  template <class T>
+  inline list<T> cons (T&& t, list<T>&& l) {
+    return list<T>{
+      constructor<cons_t<T>>{}, std::forward<T> (t), std::forward<list<T>>(l)};
+  }
+
+
 }//namespace
-
-template <class T>
-inline list<T> nil () {
-  return list<T>{constructor<nil_t<T>>{}};
-}
-
-template <class T>
-inline list<T> cons (T&& t, list<T>&& l) {
-  return list<T>{
-    constructor<cons_t<T>>{}, std::forward<T> (t), std::forward<list<T>>(l)};
-}
 
 TEST (pgs, get) {
 

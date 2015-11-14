@@ -86,6 +86,23 @@ namespace detail {
     using type = recursive_wrapper_unwrap_t<T>;
   };
 
+  struct sum_type_accessor {
+
+    template <class... Ts>
+    static constexpr std::size_t active_index (sum_type<Ts...> const& s) 
+      noexcept {
+      return s.cons;
+    }
+
+    template <class... Ts>
+    static constexpr bool compare_at (
+         std::size_t i, sum_type<Ts...> const& u, sum_type<Ts...> const& v) 
+      noexcept {
+      return u.data.compare (i, v.data);
+    }
+
+  };
+
   template <std::size_t I, class... Ts>
   struct get_sum_type_element {
 
@@ -146,9 +163,10 @@ private:
   recursive_union<Ts...> data;
 
 private:
+  friend struct detail::sum_type_accessor;
   template <std::size_t I, class... Us>
-  friend struct detail::get_sum_type_element;
-  
+    friend struct detail::get_sum_type_element;
+
 public:
 
   //! Ctor
@@ -293,6 +311,19 @@ inline constexpr type_at<I, Ts...> const& get (sum_type<Ts...> const& s) {
   return detail::get_sum_type_element<I, Ts...>::get (s);
 }
 //! \endcond
+
+template <class... Ts>
+bool operator == (sum_type<Ts...> const& u, sum_type<Ts...> const& v) {
+  std::size_t m = detail::sum_type_accessor::active_index (u);
+  std::size_t n = detail::sum_type_accessor::active_index (v);
+
+  return m == n && detail::sum_type_accessor::compare_at (m, u, v);
+}
+
+template <class... Ts>
+bool operator != (sum_type<Ts...> const& u, sum_type<Ts...> const& v) {
+  return ! (u == v);
+}
 
 }//namespace pgs
 
