@@ -104,6 +104,21 @@ public:
   type const* get_pointer() const; //!< Accessor to the `type` instance
 };
 
+//! \brief `true` if contained values compare equal, false otherwise
+template <class T>
+bool operator== (
+  recursive_wrapper<T> const& lhs, recursive_wrapper<T> const& rhs) {
+  return lhs.get () == rhs.get ();
+}
+
+//! \brief `true` if contained values compare not equal, `false`
+//! otherwise
+template <class T>
+bool operator!= (
+  recursive_wrapper<T> const& lhs, recursive_wrapper<T> const& rhs) {
+  return !(lhs.get () == rhs.get ());
+}
+
 }//namespace pgs
 
 //! \cond

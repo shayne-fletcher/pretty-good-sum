@@ -569,24 +569,6 @@ namespace pgs {
     }
   };
   
-  //! \cond
-  namespace detail {
-
-  template <class T>
-  struct deref {
-    static T const& cref (T const& w) { return w; };
-  };
-
-  template <class T>
-  struct deref<recursive_wrapper<T>> {
-    static T const& cref (recursive_wrapper<T> const& w) {
-      return w.get ();
-    }
-  };
-  //! \endcond
-
-  }//namespace detail
-
   //! \brief Full specialization
   //! 
   //! This specialization applies when there are no more "cases" in
@@ -733,9 +715,7 @@ namespace pgs {
     //! \param rhs The value to compare the LHS against
     bool compare (size_t i, recursive_union const& rhs) const 
       noexcept {
-        return i == 0 ? 
-                detail::deref<T>::cref (v) == detail::deref<T>::cref (rhs.v) : 
-               r.compare (i - 1, rhs.r);
+        return i == 0 ? v == rhs.v : r.compare (i - 1, rhs.r);
     }
   
     //! \brief An anonymous union
