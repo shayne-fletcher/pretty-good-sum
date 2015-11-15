@@ -12,7 +12,8 @@ mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 # Standard modules
 
-find_package(Doxygen QUIET)
+find_package(Doxygen)
+message ("Doxygen = ${Doxygen}")
 
 # Non-standard modules (thanks Juan!)
 
@@ -79,7 +80,7 @@ if(BUILD_DOCUMENTATION)
 
     ADD_CUSTOM_TARGET(doc ALL
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        #WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM)
 
