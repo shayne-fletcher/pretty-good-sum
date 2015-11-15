@@ -10,3 +10,4 @@ USE_PDFLATEX=NO
 MACRO_EXPANSION=YES
 TAGFILES += "@CMAKE_SOURCE_DIR@/doxygen/cppreference-doxygen-web.tag.xml=http://en.cppreference.com/w/"
 IMAGE_PATH="@CMAKE_SOURCE_DIR@/images"
+EXAMPLE_PATH=@CMAKE_SOURCE_DIR@/tests

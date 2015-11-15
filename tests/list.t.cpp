@@ -8,16 +8,22 @@
 namespace {
   using namespace pgs;
   
-  template <class T> struct cons_t;
-  struct nil_t {};
+  //type list = Cons of 'a * 'a list | Nil
+  template <class T> struct cons_t; // Case 2
+  struct nil_t {};  // Case 2
 
+  //equaility of nil_t values
   bool operator==(nil_t const&, nil_t const&) {
     return true;
   }
   
+  //Since cons_t<T> values contain list_t<values>, cons_t<T> (and so
+  //list_t<T>) is a recursive type
   template <class T>
   using list = sum_type <recursive_wrapper<cons_t<T>>, nil_t>;
 
+  //list<T> is now defined and so we may go ahead and "fill in" the
+  //definition of cons_<T>
   template <class T> 
   struct cons_t {
     T hd;
@@ -30,21 +36,25 @@ namespace {
 
   };
 
-  template <class T>
+ //equality of cons_t<T> values
+ template <class T>
   bool operator== (cons_t<T> const& l, cons_t<T> const& r) {
     return l.hd == r.hd && l.tl == r.tl;
   }
 
+ //non-equality of cons_t<T> values
   template <class T>
   bool operator!= (cons_t<T> const& l, cons_t<T> const& r) {
     return !(l == r);
   }
 
+  //A factory function for a nil_t (a constant)
   template <class T>
   inline list<T> nil () {
     return list<T>{constructor<nil_t>{}};
   }
 
+  //Factory function for a cons_t<T>
   template <class T>
   inline list<T> cons (T&& t, list<T>&& l) {
     return list<T>{
@@ -56,6 +66,7 @@ namespace {
 #  pragma warning(disable:4172)
 #endif//defined(_MSC_VER)
 
+  //hd
   template <class T>
   inline T const& hd (list<T> const& l) {
     return l.match <T const&> (
@@ -68,6 +79,7 @@ namespace {
     );
   }
 
+  //tail
   template <class T>
   inline list<T> const& tl (list<T> const& l) {
     return l.match <list<T> const&> (
@@ -117,6 +129,7 @@ namespace {
     in List.rev (loop [] s e)
    */
 
+  //string_of_list
   template <class T>
   std::string string_of_list (list<T> const& l) {
     std::ostringstream os;
@@ -134,6 +147,7 @@ namespace {
     return os.str();
   }
 
+  //ostream inserter
   template <class T>
   std::ostream& operator<< (std::ostream& os, list<T> const& l) {
     return os << string_of_list (l) << std::endl;
@@ -145,8 +159,6 @@ TEST (pgs, list) {
 
   list<int> l = cons (2, cons (1, nil<int> ()));
   list<int> const& m = tl (tl (l));
-
-  //std::cout << reverse (l) << std::endl;
 
   ASSERT_EQ (rev (l), cons (1, cons (2, nil<int> ())));
   ASSERT_EQ (hd (l), 2);

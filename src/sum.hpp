@@ -45,6 +45,9 @@
 //! (algebraic datatype concepts of the) functional approach to
 //! programming.
 
+//! \example list.t.cpp
+//! Implementation of a functional list
+
 #  include "recursive_union.hpp"
 
 #  include <cstddef>
