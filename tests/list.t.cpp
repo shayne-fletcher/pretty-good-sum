@@ -61,10 +61,10 @@ namespace {
     return l.match <T const&> (
       //case : nil_t
       [] (nil_t const&) -> T const& { 
-        throw std::runtime_error{"hd"}; } 
+        throw std::runtime_error{"hd"}; },
       //case : cons_t<T>                         
       [] (cons_t<T> const& n) -> T const& { 
-        return n.hd; }, 
+        return n.hd; } 
     );
   }
 
@@ -73,10 +73,10 @@ namespace {
     return l.match <list<T> const&> (
       //case : nil_t
       [] (nil_t const&) -> list<T> const& { 
-        throw std::runtime_error{"tl"}; } 
+        throw std::runtime_error{"tl"}; },
       //case : cons_t<T>                         
       [] (cons_t<T> const& n) -> list<T> const& { 
-        return n.tl; }, 
+        return n.tl; } 
     );
   }
 
@@ -89,9 +89,9 @@ namespace {
   AccT fold_left (F f, AccT acc, list<T> const& l) {
     return l.match<AccT>(
       //case : nil_t
-      [=](nil_t) -> AccT { return acc; },
+      [=](nil_t){ return acc; },
       //case : cons_t<T>
-      [=](cons_t<T> const& x) -> AccT { 
+      [=](cons_t<T> const& x) { 
         return fold_left (f, f(acc, x.hd), x.tl); }
       );
   }
@@ -148,7 +148,7 @@ TEST (pgs, list) {
 
   //std::cout << reverse (l) << std::endl;
 
-  ASSERT_EQ (reverse (l), cons (1, cons (2, nil<int> ())));
+  ASSERT_EQ (rev (l), cons (1, cons (2, nil<int> ())));
   ASSERT_EQ (hd (l), 2);
   ASSERT_EQ (m, nil<int>());
 }
