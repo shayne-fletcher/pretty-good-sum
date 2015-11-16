@@ -47,6 +47,8 @@
 
 //! \example list.t.cpp
 //! Implementation of a functional list
+//! \example expression.t.cpp
+//! Abstract syntax trees
 
 #  include "recursive_union.hpp"
 

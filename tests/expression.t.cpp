@@ -3,6 +3,8 @@
 #include "sum.hpp"
 
 namespace {
+
+//The various cases of an expression
 struct E_const;
 struct E_add;
 struct E_sub;
@@ -10,8 +12,9 @@ struct E_sub;
 struct E_mul;
 struct E_div;
 
+//The sum `xpr_t` models an expression
 using xpr_t = pgs::sum_type<
-  E_const
+    E_const
   , pgs::recursive_wrapper<E_add>
   , pgs::recursive_wrapper<E_sub>
   , pgs::recursive_wrapper<E_mul>
@@ -44,8 +47,8 @@ struct E_div {
   {}
 };
 
+//ostream inserter
 std::ostream& operator << (std::ostream& os, xpr_t const& e) {
-
   return e.match<std::ostream&> (
     [&](E_const const& e) -> auto& { return os << e.i;  },
     [&](E_mul const& e) -> auto& { return os << e.l << "*" << e.r;  },
@@ -53,12 +56,11 @@ std::ostream& operator << (std::ostream& os, xpr_t const& e) {
     [&](E_add const& e) -> auto& { return os << "(" << e.l << " + " << e.r << ")"; },
     [&](E_sub const& e) -> auto& { return os << "(" << e.l << " - " << e.r << ")"; }
    );
-
 }
 
 }//namespace<anonymous>
 
-TEST (pgs, breathing) {
+TEST (pgs, expression) {
 
   //n=2 + 3
   xpr_t n{

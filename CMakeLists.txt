@@ -52,7 +52,7 @@ INSTALL(FILES ${PGS_HPP} DESTINATION include) #Headers
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/images DESTINATION share/doc/images) #Images
 
 SET(PGS_TESTS_CPP 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/breathing.t.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/expression.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/match.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/get.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/list.t.cpp

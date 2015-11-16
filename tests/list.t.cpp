@@ -8,8 +8,6 @@
 namespace {
   using namespace pgs;
   
-  //type list = Cons of 'a * 'a list | Nil
-
   template <class T> struct cons_t; // Case 1
   struct nil_t {};  // Case 2
 
@@ -23,8 +21,8 @@ namespace {
   template <class T>
   using list = sum_type <recursive_wrapper<cons_t<T>>, nil_t>;
 
-  //It's helpful to have a trait that can "get at" the type `T`
-  //contained by a list type `L`
+  //A trait that can "get at" the type `T` contained by a list type
+  //`L`
   template <class L>
   struct list_value_type;
   template <class T>
@@ -120,7 +118,7 @@ namespace {
 
   //rev
   template<class T>
-  list<T> rev (list<T> const& l) {
+  inline auto rev (list<T> const& l) {
     return fold_left(
         [](auto const& acc, auto const& x) { return cons (x, acc); }
       , nil<T>()
@@ -130,10 +128,8 @@ namespace {
 
   //length
   template <class T>
-  std::size_t length (list<T> const& l) {
-    return fold_left (
-      [](auto acc, auto const&) -> auto { return ++acc; }
-      , 0, l);
+  inline auto length (list<T> const& l) {
+    return fold_left ([](auto acc, auto const&) { return ++acc; }, 0, l);
   }
 
   //nth
@@ -150,8 +146,7 @@ namespace {
 
   namespace detail {
     list<int> range_aux (list<int> const& acc, int const s, int e) {
-      if (s >= e)
-        return acc;
+      if (s >= e) return acc;
       return range_aux (cons (s, acc), s + 1, e);
     };
   }//namespace detail
@@ -166,14 +161,12 @@ namespace {
   std::string string_of_list (list<T> const& l) {
     std::ostringstream os;
     l.match<std::ostream&> (
-
       //case cons:
       [&](cons_t<T> const& e) -> auto& { 
         return os << "cons ("<< e.hd << ", " << string_of_list (e.tl) << ")";  
       },
       //case nil:
       [&](nil_t const& e) -> auto& { return os << "nil"; }
-
     );
 
     return os.str();
