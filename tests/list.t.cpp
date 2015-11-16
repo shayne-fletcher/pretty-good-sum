@@ -129,6 +129,26 @@ namespace {
    );
   }
 
+  //length
+  template <class T>
+  std::size_t length (list<T> const& l) {
+    return fold_left (
+      [](auto acc, auto const&) -> auto { return ++acc; }
+      , 0, l);
+  }
+
+  //nth
+  template <class T>
+  T const& nth (list<T> const& l, std::size_t i) {
+    return l.match<T const&>(
+      //case : nil_t
+      [](nil_t) -> T const& { 
+        throw std::runtime_error {"nth"}; return *(T*)0; },
+      //case : cons_t<T>
+      [=](cons_t<T> const& x) -> T const& { return i == 0 ? x.hd : nth (x.tl, i - 1); }
+     );
+  }
+
   namespace detail {
     list<int> range_aux (list<int> const& acc, int const s, int e) {
       if (s >= e)
@@ -137,6 +157,7 @@ namespace {
     };
   }//namespace detail
 
+  //rg - like the Python function 'range'
   list<int> rg (int begin, int end) {
     return rev (detail::range_aux (nil<int> (), begin, end));
   };
@@ -170,7 +191,8 @@ namespace {
 TEST (pgs, list) {
 
   list<int> l = rg (1, 4);
-  list<int> const& m = tl (tl (l));
+
+  std::cout << nth (l, 2) << std::endl;
 
   ASSERT_EQ (rev (l), cons (3, cons (2, cons (1,  nil<int> ()))));
 }
