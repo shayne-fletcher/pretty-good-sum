@@ -13,11 +13,17 @@ mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 # Standard modules
 
 find_package(Doxygen)
-message ("Doxygen = ${Doxygen}")
 
 # Non-standard modules (thanks Juan!)
 
-set (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
+if (DEFINED ENV{CMAKE_MODULE_PATH})
+  set (CMAKE_MODULE_PATH $ENV{CMAKE_MODULE_PATH})
+else()
+  set (CMAKE_MODULE_PATH ../cmake/Modules)
+endif(DEFINED ENV{CMAKE_MODULE_PATH})
+
+message (CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH})
+
 find_package(GoogleTest REQUIRED) #Google test
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
