@@ -122,8 +122,7 @@ namespace {
   template<class T>
   list<T> rev (list<T> const& l) {
     return fold_left(
-        [](auto const& acc, auto const& x) -> auto { 
-          return list<T>{constructor<cons_t<T>>{}, x, acc}; }
+        [](auto const& acc, auto const& x) { return cons (x, acc); }
       , nil<T>()
       , l
    );
