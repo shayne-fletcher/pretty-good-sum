@@ -41,7 +41,6 @@ namespace {
     cons_t (U&& hd, V&& tl) :
       hd (std::forward<U> (hd)), tl (std::forward<V>(tl)) {
     }
-
   };
 
  //Equality of `cons_t<T>` values
@@ -167,28 +166,6 @@ namespace {
       , l, r);
   }
 
-  //string_of_list
-  template <class T>
-  std::string string_of_list (list<T> const& l) {
-    std::ostringstream os;
-    l.match<std::ostream&> (
-      //case cons:
-      [&](cons_t<T> const& e) -> auto& { 
-        return os << "cons ("<< e.hd << ", " << string_of_list (e.tl) << ")";  
-      },
-      //case nil:
-      [&](nil_t const& e) -> auto& { return os << "nil"; }
-    );
-
-    return os.str();
-  }
-
-  //ostream inserter
-  template <class T>
-  std::ostream& operator<< (std::ostream& os, list<T> const& l) {
-    return os << string_of_list (l) << std::endl;
-  }
-
   //List monad 'unit'
   template <class T>
   inline list<T> unit (T&& a) { 
@@ -228,14 +205,32 @@ namespace {
 }//namespace
 
 TEST (pgs, list) {
+
+  //basics
+
   //check rev [1; 2; 3] = [3; 2; 1]
   ASSERT_EQ (rev (rg (1, 4)), cons (3, cons (2, cons (1,  nil<int> ()))));
   //check append ([1; 2; 3], [4; 5; 6; 7]) = [1; 2; 3; 4; 5; 6; 7]
   ASSERT_EQ (append (rg (1, 4), rg (4, 8)), rg (1, 8));
   //check join ([1; 2], [3; 4]) = [1; 2; 3; 4]
-  ASSERT_EQ (join (cons (rg (1, 3), cons(rg (3, 5), nil<list<int>>()))), rg (1, 5));
+  ASSERT_EQ (join (cons (rg (1, 3), cons (rg (3, 5), nil<list<int>>()))) , rg (1, 5));
+
+  //list comprehensions
+
   //check [1; 2]^2 = [1; 4]
+  list<int> l = rg (1, 3);
   list<int> m = //avoid 'lambda in unevaluated ctx' error
-                map ([](auto m) { return m * m; }, rg (1, 3));
+     map ([](auto m) { return m * m; }, rg (1, 3));
   ASSERT_EQ (m, cons (1, cons (4, nil<int>())));
+  //cartesian product
+  auto n = 
+     l * [&m](auto x) { 
+        return m * [=](auto y) { 
+           return unit (std::make_pair (x, y)); }; 
+  };
+  ASSERT_EQ (n, cons (std::make_pair (1, 1)
+              , cons (std::make_pair (1, 4)
+              , cons (std::make_pair (2, 1)
+              , cons (std::make_pair (2, 4)
+              , nil<std::pair<int, int>>())))));
 }
