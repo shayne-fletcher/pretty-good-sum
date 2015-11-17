@@ -69,11 +69,6 @@ namespace {
     return list<t>{constructor<cons_t<t>>{}, std::forward<U>(hd), std::forward<V>(tl) };
   }
 
-#if defined (_MSC_VER)
-#  pragma warning(push)
-#  pragma warning(disable:4172)
-#endif//defined(_MSC_VER)
-
   //hd
   template <class T>
   inline T const& hd (list<T> const& l) {
@@ -100,10 +95,6 @@ namespace {
     );
   }
 
-#if defined (_MSC_VER)
-#  pragma warning(pop)
-#endif//defined(_MSC_VER)
-
   //fold_left
   template <class F, class AccT, class T>
   AccT fold_left (F f, AccT const& acc, list<T> const& l) {
@@ -113,6 +104,18 @@ namespace {
       //case : cons_t<T>
       [=](cons_t<T> const& x) { 
         return fold_left (f, f(acc, x.hd), x.tl); }
+      );
+  }
+
+  //fold_right
+  template <class F, class T, class AccT>
+  AccT fold_right (F f, list<T> const& l, AccT const& acc) {
+    return l.match<AccT>(
+      //case : nil_t
+      [=](nil_t){ return acc; },
+      //case : cons_t<T>
+      [=](cons_t<T> const& x) { 
+        return f (x.hd, (fold_right (f, x.tl, acc))); }
       );
   }
 
@@ -156,6 +159,14 @@ namespace {
     return rev (detail::range_aux (nil<int> (), begin, end));
   };
 
+  //append (catenate two lists - not tail recursive)
+  template <class T>
+  list<T> append (list<T> const& l, list<T> const& r) {
+    return fold_right (
+      [](T const& x, list<T> const& acc) -> list<T> { return cons (x, acc); }
+      , l, r);
+  }
+
   //string_of_list
   template <class T>
   std::string string_of_list (list<T> const& l) {
@@ -178,13 +189,53 @@ namespace {
     return os << string_of_list (l) << std::endl;
   }
 
+  //List monad 'unit'
+  template <class T>
+  inline list<T> unit (T&& a) { 
+    return cons (std::forward<T>(a), nil<T>()); 
+  }
+
+  //List monad 'bind'
+  /*
+    let rec ( * ) : 'a t -> ('a -> 'b t) -> 'b t =
+      fun l -> fun k ->
+        match l with | [] -> [] | (h :: tl) -> k h @ tl * k
+  */
+  template <class T, class F>
+  auto operator * (list<T> const& a, F k) -> decltype (k (hd (a))) {
+    using result_t = decltype (k (hd (a)));
+    using t = list_value_type_t<result_t>;
+    return a.match<result_t>(
+        [](nil_t const&) { return nil<t>(); }, 
+        [=](cons_t<T> const& x) { return append (k (x.hd), x.tl * k); }
+    );
+  }
+
+  //join - 'z * \m.m'
+  // Concatenates a list of lists
+  template <class T>
+  list<T> join (list<list<T>> const& z) {
+    return z * [](auto const& m) { return m; };
+  }
+
+  //map - 'map f m = m * \a.unit (f a)'
+  //  The equivalent of `std::transform ()`
+  template <class T, class F>
+  list<T> map (F f, list<T> const& m) {
+    return m * [=](auto const& a) { return unit (f (a)); };
+  }
+
 }//namespace
 
 TEST (pgs, list) {
-
-  list<int> l = rg (1, 4);
-
-  std::cout << nth (l, 2) << std::endl;
-
-  ASSERT_EQ (rev (l), cons (3, cons (2, cons (1,  nil<int> ()))));
+  //check rev [1; 2; 3] = [3; 2; 1]
+  ASSERT_EQ (rev (rg (1, 4)), cons (3, cons (2, cons (1,  nil<int> ()))));
+  //check append ([1; 2; 3], [4; 5; 6; 7]) = [1; 2; 3; 4; 5; 6; 7]
+  ASSERT_EQ (append (rg (1, 4), rg (4, 8)), rg (1, 8));
+  //check join ([1; 2], [3; 4]) = [1; 2; 3; 4]
+  ASSERT_EQ (join (cons (rg (1, 3), cons(rg (3, 5), nil<list<int>>()))), rg (1, 5));
+  //check [1; 2]^2 = [1; 4]
+  list<int> m = //avoid 'lambda in unevaluated ctx' error
+                map ([](auto m) { return m * m; }, rg (1, 3));
+  ASSERT_EQ (m, cons (1, cons (4, nil<int>())));
 }
