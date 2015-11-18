@@ -86,6 +86,22 @@ auto operator * (option<T> const& o, F k) -> decltype (k (get (o))) {
   );
 }
 
+//Option monad 'unit'
+template<class T>
+option<T> unit (T&& a) {
+  return some (std::forward<T> (a));
+}
+
+//map
+template <class T, class F>
+auto map (F f, option<T> const& m) -> option<decltype (f (get (m)))>{
+  using t = decltype (f ( get (m)));
+  return m.match<option<t>>(
+      [](none_t const&) { return none<t>(); }, 
+      [=](some_t<T> const& o) { return unit (f (o.data)); }
+  );
+}
+
 }//namespace<anonymous>
 
 TEST (pgs, option) {
@@ -94,4 +110,6 @@ TEST (pgs, option) {
   auto f = [](int i) { //avoid use of lambda in unevaluated context
     return some (i * i);   };
   ASSERT_EQ (get (some (3) * f), 9);
+  option<int> x = map ([](int x) { return x * x; }, some (3));
+  ASSERT_EQ (get (x), 9);
 }
