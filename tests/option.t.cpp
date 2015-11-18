@@ -49,9 +49,9 @@ option<T> some (T&& val) {
 //is_none : `true` if a `some_<>`, `false` otherwise
 template<class T>
 bool is_none (option<T> const& o) {
-  return u.match<bool> (
-   [](some_t<T> const&) -> T const& { return true; },
-   [](none_t const&) -> T const& { return false; }
+  return o.match<bool> (
+   [](some_t<T> const&) { return true; },
+   [](none_t const&) { return false; }
   );
 }
 
@@ -98,7 +98,7 @@ auto map (F f, option<T> const& m) -> option<decltype (f (get (m)))>{
   using t = decltype (f ( get (m)));
   return m.match<option<t>>(
       [](none_t const&) { return none<t>(); }, 
-      [=](some_t<T> const& o) { return unit (f (o.data)); }
+      [=](some_t<T> const& o) { return some (f (o.data)); }
   );
 }
 
@@ -110,6 +110,9 @@ TEST (pgs, option) {
   auto f = [](int i) { //avoid use of lambda in unevaluated context
     return some (i * i);   };
   ASSERT_EQ (get (some (3) * f), 9);
-  option<int> x = map ([](int x) { return x * x; }, some (3));
+  auto g = [](int x) { return x * x; };
+  option<int> x = map (g, some (3));
+  option<int> y = map (g, none<int>());
   ASSERT_EQ (get (x), 9);
+  ASSERT_TRUE (is_none (y));
 }
