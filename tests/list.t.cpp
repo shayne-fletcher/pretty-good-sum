@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "sum.hpp"
+#include "sum_type.hpp"
 
 namespace {
   using namespace pgs;
@@ -188,7 +188,7 @@ namespace {
     );
   }
 
-  //join - 'z * \m.m'
+  //join - 'z * \a.a'
   // Concatenates a list of lists
   template <class T>
   list<T> join (list<list<T>> const& z) {

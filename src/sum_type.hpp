@@ -47,8 +47,13 @@
 
 //! \example list.t.cpp
 //! Implementation of a functional list
+//!
 //! \example expression.t.cpp
 //! Abstract syntax trees
+//!
+//! \example option.t.cpp
+//! Options are a type that can be either 'None' (undefined) or 'Some
+//! x' for any value 'x'
 
 #  include "recursive_union.hpp"
 

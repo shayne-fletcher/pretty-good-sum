@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "sum.hpp" //For `sum_type<>`
+#include "sum_type.hpp" //For `sum_type<>`
 
 namespace {
 

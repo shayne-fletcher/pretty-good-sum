@@ -42,7 +42,7 @@ set(PGS_HPP
 	${CMAKE_CURRENT_SOURCE_DIR}/src/logical.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/recursive_wrapper.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/recursive_union.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/sum.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/sum_type.hpp
 )
 set(PGS_CPP) #There are no .cpp files
 
@@ -56,6 +56,7 @@ SET(PGS_TESTS_CPP
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/match.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/get.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/list.t.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/option.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/move.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/copy.t.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/main.t.cpp

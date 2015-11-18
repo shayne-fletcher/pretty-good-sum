@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "sum.hpp"
+#include "sum_type.hpp"
 
 namespace {
 struct E_const;
