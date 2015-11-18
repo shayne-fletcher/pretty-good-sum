@@ -81,8 +81,8 @@ auto operator * (option<T> const& o, F k) -> decltype (k (get (o))) {
   using result_t = decltype (k ( get (o)));
   using t = option_value_type_t<result_t>;
   return o.match<result_t>(
-      [](none_t const&) -> result_t { return none<t>(); }, 
-      [=](some_t<T> const& o) -> result_t { return k (o.data); }
+      [](none_t const&) { return none<t>(); }, 
+      [=](some_t<T> const& o) { return k (o.data); }
   );
 }
 
@@ -91,10 +91,7 @@ auto operator * (option<T> const& o, F k) -> decltype (k (get (o))) {
 TEST (pgs, option) {
   ASSERT_EQ (get(some (1)), 1);
   ASSERT_THROW (get (none<int>()), std::runtime_error);
-  auto f = [](int i) -> option<int> { //avoid use of lambda in unevaluated context
+  auto f = [](int i) { //avoid use of lambda in unevaluated context
     return some (i * i);   };
-  option<int> o = some (3);
-  option<int> p = o * f;
-
-  //ASSERT_EQ (get (o * f), 9);
+  ASSERT_EQ (get (some (3) * f), 9);
 }
