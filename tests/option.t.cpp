@@ -28,7 +28,7 @@ template<class T>
 using option = sum_type<some_t<T>, none_t>;
 
 //A trait that can "get at" the type `T` contained by an option
-template <class L>
+template <class>
 struct option_value_type;
 template <class T>
 struct option_value_type<option<T>> { typedef T type; };
@@ -86,9 +86,9 @@ T& get (option<T>& u) {
 template <class T>
 T const& default_ (T const& x, option<T> const& u) {
   return u.match<T const&> (
-   [](some_t<T> const& o) -> T const& { return o.data; },
-   [=](none_t const&) -> T const& { return x; }
-   );
+    [](some_t<T> const& o) -> T const& { return o.data; },
+    [=](none_t const&) -> T const& { return x; }
+  );
 }
 
 //Option monad 'bind'
