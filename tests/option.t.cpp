@@ -3,6 +3,7 @@
 #include "sum_type.hpp"
 
 #include <iostream>
+#include <cstdlib>
 
 //type 'a t = Some of 'a | None
 
@@ -50,8 +51,8 @@ option<T> some (T&& val) {
 template<class T>
 bool is_none (option<T> const& o) {
   return o.match<bool> (
-   [](some_t<T> const&) { return true; },
-   [](none_t const&) { return false; }
+   [](some_t<T> const&) { return false; },
+   [](none_t const&) { return true; }
   );
 }
 
@@ -115,4 +116,56 @@ TEST (pgs, option) {
   option<int> y = map (g, none<int>());
   ASSERT_EQ (get (x), 9);
   ASSERT_TRUE (is_none (y));
+}
+
+namespace {
+
+//safe "arithmetic"
+
+auto add (int x) {
+  return [=](int y) {
+    if ((x > 0) && (y > INT_MAX - x)) {
+        return none<int>(); //overflow
+      }
+    return some (y + x);
+  };
+}
+
+auto sub (int x) {
+  return [=](int y) {
+    if ((x > 0) && (y < (INT_MIN +x))) {
+      return none<int>(); //underflow
+    }
+    return some (y - x);
+  };
+}
+
+auto mul (int x) {
+  return [=](int y) {
+    if (x != 0 && y > (INT_MAX)/x) {
+      return none<int>(); //overflow
+    }
+    return some (y * x);
+  };
+}
+
+auto div (int x) {
+  return [=](int y) {
+    if (x == 0) {
+      return none<int>();//division by 0
+    }
+    return some (y / x);
+  };
+}
+
+}//namespace<anonymous>
+
+TEST(pgs, safe_arithmetic) {
+
+  //2 * (INT_MAX/2) + 1 (won't overflow since `INT_MAX` is odd and
+  //division will truncate)
+  ASSERT_EQ (get (unit (INT_MAX) * div (2) * mul (2) * add (1)), INT_MAX);
+
+  //2 * (INT_MAX/2 + 1) (overflow)
+  ASSERT_TRUE (is_none (unit (INT_MAX) * div (2) * add (1) * mul (2)));
 }
