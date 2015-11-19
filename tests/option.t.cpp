@@ -47,13 +47,19 @@ option<T> some (T&& val) {
   return option<T>{constructor<some_t<T>>{}, std::forward<T> (val)};
 }
 
-//is_none : `true` if a `some_<>`, `false` otherwise
+//is_none : `true` if a `some_t<>`, `false` otherwise
 template<class T>
 bool is_none (option<T> const& o) {
   return o.match<bool> (
    [](some_t<T> const&) { return false; },
    [](none_t const&) { return true; }
   );
+}
+
+//is_some : `false` if a `none_t`, `true` otherwise
+template<class T>
+inline bool is_some (option<T> const& o) {
+  return !is_none (o);
 }
 
 //Attempt to get a `const` reference to the value contained by an
@@ -73,6 +79,15 @@ T& get (option<T>& u) {
   return u.match<T&> (
    [](some_t<T>& o) -> T& { return o.data; },
    [](none_t&) -> T& { throw std::runtime_error {"get"}; }
+   );
+}
+
+//`default x (Some v)` returns `v` and `default x None` returns `x`
+template <class T>
+T const& default_ (T const& x, option<T> const& u) {
+  return u.match<T const&> (
+   [](some_t<T> const& o) -> T const& { return o.data; },
+   [=](none_t const&) -> T const& { return x; }
    );
 }
 
@@ -116,6 +131,9 @@ TEST (pgs, option) {
   option<int> y = map (g, none<int>());
   ASSERT_EQ (get (x), 9);
   ASSERT_TRUE (is_none (y));
+
+  ASSERT_EQ (default_(1, none<int>()), 1);
+  ASSERT_EQ (default_(1, some(3)), 3);
 }
 
 namespace {
