@@ -91,6 +91,16 @@ T const& default_ (T const& x, option<T> const& u) {
   );
 }
 
+//`map_default f x (Some v)` returns `f v` and `map_default f x None`
+//returns `x`
+template<class F, class U, class T>
+auto map_default (F f, U const& x, option<T> const& u) -> U {
+  return u.match <U> (
+    [=](some_t<T> const& o) -> U { return f (o.data); },
+    [=](none_t const&) -> U { return x; }
+  );
+}
+
 //Option monad 'bind'
 template<class T, class F>
 auto operator * (option<T> const& o, F k) -> decltype (k (get (o))) {
@@ -127,13 +137,14 @@ TEST (pgs, option) {
     return some (i * i);   };
   ASSERT_EQ (get (some (3) * f), 9);
   auto g = [](int x) { return x * x; };
-  option<int> x = map (g, some (3));
-  option<int> y = map (g, none<int>());
-  ASSERT_EQ (get (x), 9);
-  ASSERT_TRUE (is_none (y));
+  ASSERT_EQ (get (map (g, some (3))), 9);
+  ASSERT_TRUE (is_none (map (g, none<int>())));
 
   ASSERT_EQ (default_(1, none<int>()), 1);
   ASSERT_EQ (default_(1, some(3)), 3);
+  auto h = [](int y){ return float (y * y); };
+  ASSERT_EQ (map_default (h, 0.0, none<int>()), 0.0);
+  ASSERT_EQ (map_default (h, 0.0, some (3)), 9.0);
 }
 
 namespace {
