@@ -153,7 +153,8 @@ namespace {
 
 auto add (int x) {
   return [=](int y) {
-    if ((x > 0) && (y > INT_MAX - x)) {
+    if ((x > 0) && (y > INT_MAX - x) ||
+        (x < 0) && (y < INT_MIN - x)) {
         return none<int>(); //overflow
       }
     return some (y + x);
@@ -162,8 +163,9 @@ auto add (int x) {
 
 auto sub (int x) {
   return [=](int y) {
-    if ((x > 0) && (y < (INT_MIN +x))) {
-      return none<int>(); //underflow
+    if ((x > 0) && (y < (INT_MIN + x)) ||
+        (x < 0) && (y > (INT_MAX + x))) {
+      return none<int>(); //overflow
     }
     return some (y - x);
   };
@@ -171,9 +173,32 @@ auto sub (int x) {
 
 auto mul (int x) {
   return [=](int y) {
-    if (x != 0 && y > (INT_MAX)/x) {
-      return none<int>(); //overflow
+
+    if (y > 0) { //y positive
+      if (x > 0) {  //x positive
+        if (y > (INT_MAX / x)) {
+          return none<int>(); //overflow
+        }
+      }
+      else { //y positive, x nonpositive
+        if (x < (INT_MIN / y)) {
+          return none<int>(); //overflow
+        }
+      }
     }
+    else { //y is nonpositive
+      if (x > 0) { // y is nonpositive, x is positive
+        if (y < (INT_MIN / x)) {
+          return none<int>();
+        }
+      }
+      else { //y, x nonpositive 
+        if ((y != 0) && (x < (INT_MAX / y))) {
+          return none<int>(); //overflow
+        }
+      }
+    }
+
     return some (y * x);
   };
 }
@@ -183,6 +208,10 @@ auto div (int x) {
     if (x == 0) {
       return none<int>();//division by 0
     }
+
+    if (y == INT_MIN && x == -1)
+      return none<int>(); //overflow
+
     return some (y / x);
   };
 }
@@ -197,4 +226,7 @@ TEST(pgs, safe_arithmetic) {
 
   //2 * (INT_MAX/2 + 1) (overflow)
   ASSERT_TRUE (is_none (unit (INT_MAX) * div (2) * add (1) * mul (2)));
+
+  //INT_MIN/(-1)
+  ASSERT_TRUE (is_none (unit (INT_MIN) * div (-1)));
 }
