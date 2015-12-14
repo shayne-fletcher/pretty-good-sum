@@ -48,6 +48,9 @@
 //! \example list.t.cpp
 //! Implementation of a functional list
 //!
+//! \example tree.t.cpp
+//! Dead simple, purely functional binary search tree
+//!
 //! \example expression.t.cpp
 //! Abstract syntax trees
 //!
