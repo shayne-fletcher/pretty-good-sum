@@ -187,6 +187,43 @@ namespace {
     bool exists (P const& p) const {
       return fold (false, [&p](auto acc, auto const& n) { return acc || p (n); });
     }
+
+    //Compute a tree all the bindings that satisfy the predicate 'p'
+    template <class P>
+    self_type filter (P const& p) const {
+      auto f = [&p](auto const& acc, value_type const& b) {
+        if (p (b))
+          return acc.insert (b);
+        return acc;
+      };
+      return fold (self_type{}, f);
+    }
+
+    //Compute a pair of maps `(l, r)` where `l` contains all the
+    //bindings that satisfy the predicate `p` and `r` is all the
+    //bindings that dont'
+    template <class P>
+    std::pair<self_type, self_type> partition (P const& p) const {
+      auto f = [&p](auto const& acc, value_type const& b) {
+        auto const& l = acc.first, r = acc.second;
+        if (p (b))
+          return std::make_pair (self_type{l}.insert (b), self_type{r});
+        return std::make_pair (self_type{l}, self_type{r}.insert (b));
+      };
+      return fold (std::make_pair (self_type{}, self_type{}), f);
+    }
+
+    //Computes a tree with the same keys but where `f` has been
+    //applied to all values in the bindings
+    template <class F>
+    auto map (F f) -> 
+      binary_search_tree<K, decltype (f (std::declval<V>()))> {
+      auto l = [=](auto const& acc, value_type const& b) {
+        return acc.insert (std::make_pair (b.first, f (b.second)));
+      };
+      return fold (self_type{}, l);
+    }
+
   };
 
   //Factory function for creating a tree from a list
@@ -254,9 +291,11 @@ TEST (pgs, tree_more) {
   EXPECT_EQ (ages.lookup (std::string {"sally"}), 25);
   EXPECT_THROW (ages.lookup (std::string {"gru"}), std::runtime_error);
 
+  std::cout << "Bindings : ";
   ages.bindings (
     std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
   );
+  std::cout << '\n';
 
   auto everyone_of_age = [](auto const& b) { return b.second > 21; };
   EXPECT_FALSE (ages.for_all (everyone_of_age));
@@ -266,4 +305,26 @@ TEST (pgs, tree_more) {
   EXPECT_TRUE (ages.exists (sebastien));
   auto gru = [](auto const& b) { return b.first == "gru"; };
   EXPECT_FALSE (ages.exists (gru));
+  auto logans_run = ages.filter ([](node_t const& b) { return b.second >= 35; });
+  EXPECT_EQ (logans_run.size (), 2);
+
+  auto pp = ages.partition ([](node_t const& b) { return b.second < 30; });
+  std::cout << "Those under 30: ";
+  pp.first.bindings (
+    std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
+  );
+  std::cout << '\n';
+  std::cout << "Those 30 and over: ";
+  pp.second.bindings (
+    std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
+  );
+  std::cout << '\n';
+
+  std::cout << "Increment everyone's age : ";
+  ages = ages.map ([](auto age) { return ++age; });
+  ages.bindings(
+    std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
+  );
+  std::cout << '\n';
+  EXPECT_EQ(ages.lookup (std::string{"henry"}), 67);
 }
