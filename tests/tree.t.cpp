@@ -293,7 +293,8 @@ namespace {
     template <class P>
     std::pair<self_type, self_type> partition (P const& p) const {
       std::pair<tree_type, tree_type> res{detail::partition(impl_, p)};
-      return std::make_pair (self_type{res.first}, self_type{res.second});
+      return std::make_pair (
+       self_type{std::move(res.first)}, self_type{std::move (res.second)});
     }
 
     //Computes a tree with the same keys but where `f` has been
