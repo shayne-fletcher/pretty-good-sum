@@ -12,10 +12,7 @@ namespace {
 
   using namespace pgs;
 
-  //Dead simple binary search tree - no attempt at balancing
-  template <class K, class V>
-  class binary_search_tree {
-  private:
+  namespace detail {
     //('a, 'b) tree = 
     //  | Empty 
     //  | Node of ('a, 'b) * ('a, 'b) tree * ('a,'b) tree
@@ -27,18 +24,13 @@ namespace {
     template <class K, class V>
     using tree = sum_type <empty_t, recursive_wrapper<node_t<K, V>>>;
 
-    //These abbreviations will become essential in your efforts to
-    //retain some sanity in what follows
-    using empty_type = empty_t;
-    using node_type = node_t<K, V>;
-    using value_type = std::pair<K, V>; 
-    using tree_type = tree<K, V>;
-    using self_type = binary_search_tree<K, V>;
-
     //A definition for `tree<K, V>` being available, now we can "fill
     //in" the definition of `node_t<K, V>`
     template <class K, class V>
     struct node_t {
+      using tree_type = tree<K, V>;
+      using value_type = std::pair<K, V>; 
+
       //Construct a `node_t` from `data`, a `left` and a `right`
       //sub-tree
       template <class P, class U, class V>
@@ -47,11 +39,162 @@ namespace {
         , left_child (std::forward<U> (left_child))
         , right_child (std::forward<V> (right_child))
       {}
+
       //A node consists of:
       value_type data; //data
       tree_type left_child; //a left sub-tree and
       tree_type right_child;//a right sub-tree
     };
+
+    template <class K, class V>
+    bool empty (tree<K, V> const& t) {
+      return t.match<bool>(
+       [](empty_t) { return true; },
+       [](node_t<K, V> const&) { return false; }
+       );
+    }
+
+    template <class K, class V, class AccT, class F>
+    AccT fold (tree<K, V> const& t, AccT const& z, F f) {
+      return t.match<AccT>(
+       [&z](empty_t const&) -> AccT { return z; },
+       [=, &z](node_t<K, V> const& n) -> AccT {
+         auto const& b = n.data;
+         auto const& l = n.left_child;
+         auto const& r = n.right_child;
+         return fold(r, f (fold (l, z, f), b), f);
+       }
+     );
+    }
+
+    template <class K, class V, class P>
+    tree<K, V> insert (tree<K, V> const& t, P&& p) {
+      return t.match<tree<K, V>> (
+         [&p](empty_t) { 
+         return tree<K, V>{
+            constructor<node_t<K, V>>{}
+          , std::forward<P>(p)
+          , tree<K, V> {constructor<empty_t>{}}
+          , tree<K, V> {constructor<empty_t>{}}
+          };
+        },
+       [&p](node_t<K, V> const& m) {
+          K const& k = p.first;
+          V const& v = p.second;
+          K const& a = m.data.first;
+          tree<K, V> const& l = m.left_child;
+          tree<K, V> const& r = m.right_child;
+          if (k == a)
+            return tree<K, V>{ 
+                constructor<node_t<K, V>>{}
+                , std::forward<P> (p), l, r};
+          if (k < a) {
+            return tree<K, V>{ 
+                constructor<node_t<K, V>>{}
+                , m.data, insert (l, p), r};
+          }
+          return tree<K, V>{ 
+              constructor<node_t<K, V>>{}
+              , m.data, l, insert (r, p)};
+        }
+      );
+    }
+
+    template <class K, class V>
+    bool contains (tree<K, V> const& t, K const& k) {
+      return t.match<bool>(
+        [](empty_t) { return false; },
+        [&k](node_t<K, V> const& n) {
+          auto const& a = n.data.first;
+          auto const& l = n.left_child;
+          auto const& r = n.right_child;
+          if (k == a) return true;
+          if (k < a) return contains (l, k);
+          return contains (r, k);
+        }
+      );
+    }
+
+    template <class K, class V>
+    V const& lookup (tree<K, V> const& t, K const& k) {
+      return t.match<V const&>(
+        [](empty_t const&) -> V const& { 
+          throw std::runtime_error{"lookup"}; 
+        },
+        [&k](node_t<K, V> const& n) -> V const& { 
+          auto const& a = n.data.first;
+          auto const& l = n.left_child;
+          auto const& r = n.right_child;
+          if (k == a) return n.data.second;
+          if (k < a) return lookup (l, k);
+          return lookup (r, k); 
+        }
+      );
+    }
+
+    template <class K, class V, class P>
+    std::pair<tree<K, V>, tree<K, V>> partition (tree<K, V> const& t, P const& p) {
+      auto f = [&p](auto const& acc, std::pair<K, V> const& b) {
+        auto const& l = acc.first;
+        auto const& r = acc.second;
+        if (p (b))
+          return std::make_pair (insert (l, b), r);
+        return std::make_pair (l, insert (r, b));
+      };
+      tree<K, V> const empty{constructor<empty_t>{}};
+      return fold (t, std::make_pair (empty, empty), f);
+    }
+
+    template <class K, class V>
+    std::pair<K, V> const& min_binding (tree<K, V> const& t) {
+      return t.match<std::pair<K, V> const&>(
+        [](empty_t) -> std::pair<K, V> const& {  
+         throw std::runtime_error{"min_binding"};
+       },
+       [](node_t<K, V> const& n) -> std::pair<K, V> const& {  
+         auto const& l = n.left_child;
+         if (empty (l)) return n.data;
+         return min_binding (l);
+       }
+     );
+    }
+
+    template <class K, class V>
+    std::pair<K, V> const& max_binding (tree<K, V> const& t) {
+      return t.match<std::pair<K, V> const&>(
+        [](empty_t) -> std::pair<K, V> const& {  
+         throw std::runtime_error{"max_binding"};
+       },
+       [](node_t<K, V> const& n) -> std::pair<K, V> const& {  
+         auto const& r = n.right_child;
+         if (empty (r)) return n.data;
+         return max_binding (r);
+       }
+     );
+    }
+
+    using empty_type = empty_t;
+    template<class K, class V>
+      using node_type =node_t<K, V>;
+    template<class K, class V>
+      using value_type = typename node_type<K, V>::value_type;
+    template <class K, class V>
+      using tree_type = typename node_type<K, V>::tree_type;
+
+  }//namespace detail
+
+  //Dead simple binary search tree - no attempt at balancing
+  template <class K, class V>
+  class binary_search_tree {
+  private:
+
+    //These abbreviations will become essential in your efforts to
+    //retain some sanity in what follows
+    using empty_type = detail::empty_t;
+    using node_type = detail::node_type<K, V>;
+    using value_type = typename node_type::value_type;
+    using tree_type = typename node_type::tree_type;
+    using self_type = binary_search_tree<K, V>;
 
   private:
     tree_type impl_; //the root of the tree
@@ -68,24 +211,13 @@ namespace {
 
     //Test for emptiness
     bool empty () {
-      return impl_.match<bool>(
-       [](empty_type) { return true; },
-       [](node_type const&) { return false; }
-       );
+      return detail::empty (impl_);
     }
 
     //Apply 'f' to each binding in the tree
     template <class AccT, class F>
     AccT fold (AccT const& z, F f) const {
-      return impl_.match<AccT>(
-       [&z](empty_type const&) -> AccT { return z; },
-       [=, &z](node_type const& n) -> AccT {
-         auto const& b = n.data;
-         auto const& l = n.left_child;
-         auto const& r = n.right_child;
-         return self_type{r}.fold(f (self_type{l}.fold (z, f), b), f);
-       }
-     );
+      return detail::fold (impl_, z, f);
     }
 
     //Compute a new tree with the same bindings as self but also
@@ -93,41 +225,13 @@ namespace {
     //self, that binding is replaced by `(k, v)`
     template <class P>
     self_type insert (P&& p) const {
-      return impl_.match<self_type> (
-        [&p](empty_type) { 
-          tree_type n{
-            constructor<node_type>{}
-          , std::forward<P>(p)
-          , tree_type {constructor<empty_t>{}}
-          , tree_type {constructor<empty_t>{}}
-          };
-          return self_type{n}; },
-        [&p](node_type const& m) {
-          K const& k = p.first;
-          V const& v = p.second;
-          K const& a = m.data.first;
-          tree_type const& l = m.left_child;
-          tree_type const& r = m.right_child;
-          if (k == a)
-            return self_type { tree_type{ 
-                constructor<node_type>{}
-                , std::forward<P> (p), l, r}};
-          if (k < a) {
-            return self_type { tree_type{ 
-                constructor<node_type>{}
-                , m.data, self_type{l}.insert (p).impl_, r} };
-          }
-          return self_type { tree_type{ 
-              constructor<node_type>{}
-              , m.data, l, self_type{r}.insert (p).impl_} };
-        }
-      );
+      return self_type { detail::insert (impl_, std::forward<P>(p))};
     }
 
     //Compute a new tree with same bindings as self but without a
     //binding `k`
     self_type remove (K const& k) const {
-      return fold (self_type {},
+      return this->fold (self_type {},
         [&k](self_type const& acc, value_type const& p) {
           return k == p.first ? acc : acc.insert (p);
       });
@@ -135,57 +239,41 @@ namespace {
 
     //Compute the number of bindings in the tree
     std::size_t size () const {
-      return fold (std::size_t{0}
+      return this->fold (std::size_t{0}
           , [](std::size_t acc, auto const&) { return ++acc; });
     }
 
     //True if `k` is bound
     bool contains (K const& k) const {
-      return impl_.match<bool>(
-        [](empty_type) { return false; },
-        [&k](node_type const& n) {
-          auto const& a = n.data.first;
-          auto const& l = n.left_child;
-          auto const& r = n.right_child;
-          if (k == a) return true;
-          if (k < a) return self_type{l}.contains (k);
-          return self_type{r}.contains (k);
-        }
-      );
+      return detail::contains (impl_, k);
     }
 
     //Get the value bound to `k` in the tree. Raise a
     //`std::runtime_error` if there is no binding for `k`
     V const& lookup (K const& k) const {
-      return impl_.match<V const&>(
-        [](empty_type const&) -> V const& { throw std::runtime_error{"lookup"}; },
-        [&k](node_type const& n) -> V const& { 
-          auto const& a = n.data.first;
-          auto const& l = n.left_child;
-          auto const& r = n.right_child;
-          if (k == a) return n.data.second;
-          if (k < a) return self_type{l}.lookup (k);
-          return self_type{r}.lookup (k); }
-      );
+      return detail::lookup (impl_, k);
     }
 
     //Extract the bindings in the tree. They'll come back sorted
     //lexicographicaly on keys
     template <class ItT>
     ItT bindings (ItT dst) const {
-      return fold (dst, [](auto dst, auto const& n) { return *dst++ = n; });
+      return this->fold (dst, [](auto dst, auto const& n) { 
+          return *dst++ = n; });
     }
 
     //Check if all the bindings in the tree satisfy the predicate `p`
     template <class P>
     bool for_all (P const& p) const {
-      return fold (true, [&p](auto acc, auto const& n) { return acc && p (n); });
+      return this->fold (true, [&p](auto acc, auto const& n) { 
+          return acc && p (n); });
     }
 
     //True if at least one binding satisfies the predicate `p`
     template <class P>
     bool exists (P const& p) const {
-      return fold (false, [&p](auto acc, auto const& n) { return acc || p (n); });
+      return fold (false, [&p](auto acc, auto const& n) {
+          return acc || p (n); });
     }
 
     //Compute a tree all the bindings that satisfy the predicate 'p'
@@ -196,7 +284,7 @@ namespace {
           return acc.insert (b);
         return acc;
       };
-      return fold (self_type{}, f);
+      return this->fold (self_type{}, f);
     }
 
     //Compute a pair of maps `(l, r)` where `l` contains all the
@@ -204,13 +292,8 @@ namespace {
     //bindings that dont'
     template <class P>
     std::pair<self_type, self_type> partition (P const& p) const {
-      auto f = [&p](auto const& acc, value_type const& b) {
-        auto const& l = acc.first, r = acc.second;
-        if (p (b))
-          return std::make_pair (self_type{l}.insert (b), self_type{r});
-        return std::make_pair (self_type{l}, self_type{r}.insert (b));
-      };
-      return fold (std::make_pair (self_type{}, self_type{}), f);
+      std::pair<tree_type, tree_type> res{detail::partition(impl_, p)};
+      return std::make_pair (self_type{res.first}, self_type{res.second});
     }
 
     //Computes a tree with the same keys but where `f` has been
@@ -221,7 +304,19 @@ namespace {
       auto l = [=](auto const& acc, value_type const& b) {
         return acc.insert (std::make_pair (b.first, f (b.second)));
       };
-      return fold (self_type{}, l);
+      return this->fold (self_type{}, l);
+    }
+
+    //Return the smallest binding (may throw `std::runtime_error` if
+    //the tree is empty)
+    value_type min_binding () const {
+      return detail::min_binding (impl_);
+    }
+
+    //Return the largest binding (may throw `std::runtime_error` if
+    //the tree is empty)
+    value_type max_binding () const {
+      return detail::max_binding (impl_);
     }
 
   };
@@ -242,7 +337,7 @@ namespace {
 
 }//namespace<anonymous>
 
-TEST (pgs, tree_basic) {
+TEST (pgs, tree2_basic) {
 
   using tree_t = binary_search_tree<int, std::string>;
 
@@ -270,8 +365,7 @@ namespace std {//Hack!
 
 }//namspace std
 
-
-TEST (pgs, tree_more) {
+TEST (pgs, tree2_more) {
 
   using node_t = std::pair<std::string, int>;
   using tree_t = binary_search_tree<std::string, int>;
@@ -320,11 +414,9 @@ TEST (pgs, tree_more) {
   );
   std::cout << '\n';
 
-  std::cout << "Increment everyone's age : ";
   ages = ages.map ([](auto age) { return ++age; });
-  ages.bindings(
-    std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
-  );
-  std::cout << '\n';
   EXPECT_EQ(ages.lookup (std::string{"henry"}), 67);
+
+  EXPECT_EQ (std::make_pair (std::string{"henry"}, 67), ages.min_binding ());
+  EXPECT_EQ (std::make_pair (std::string{"sebastien"}, 34), ages.max_binding ());
 }
