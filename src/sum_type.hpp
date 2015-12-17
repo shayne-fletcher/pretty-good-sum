@@ -68,6 +68,13 @@
 
 namespace pgs {
 
+//! \brief A utility suitable for use as a wildcard in a pattern
+//! match.
+struct otherwise {
+  template <class T>
+  otherwise (T&&) {} //< Construct from anything
+};
+
 //! \cond
 template <class... Ts> class sum_type;//fwd. decl
 //! \endcond

@@ -13,11 +13,6 @@ namespace {
 
   using namespace pgs;
 
-  struct otherwise {
-    template <class T>
-    otherwise (T&&) {}
-  };
-
   struct atom_unit 
   {};
 
@@ -60,7 +55,7 @@ namespace {
   std::string string_of_atom (atom const& a) {
     return a.match<std::string>(
       [](atom_unit const&) -> std::string { return "#u"; }
-    , [](atom_bool const& b) -> std::string { return b.val ? "#t" : "f"; }
+    , [](atom_bool const& b) -> std::string { return b.val ? "#t" : "#f"; }
     , [](atom_int const& i) -> std::string { return std::to_string (i.val); }
     , [](atom_float const& f) -> std::string { return std::to_string (f.val); }
     , [](atom_string const& s) -> std::string { return s.val; }
@@ -84,8 +79,6 @@ namespace {
   */
   using expr =  sum_type<expr_atom, recursive_wrapper<expr_list>>;
 
-  //A definition for `sexpr` not being available, we can now "fill in"
-  //the definition of `sexpr_list`
   struct expr_list {
     std::list<expr> val;
     explicit expr_list(std::list<expr>const& l) : val (l)
@@ -119,6 +112,8 @@ namespace {
     expr impl_;//implementation
 
   public:
+
+    //Ctors
 
     //Default constructor
     sexpr () 
@@ -158,6 +153,9 @@ namespace {
        , [](sexpr const& s) -> expr const& { return s.impl_; });
       impl_ = expr{constructor<expr_list>{}, expr_list{std::move (exprs)}};
     }
+
+    //Predicates
+
     //Test for unit
     bool is_unit () const {
       return impl_.match<bool>(
@@ -221,7 +219,9 @@ namespace {
       );
     }
   
-    //This can't fail, this s-expression must contain an expression
+    //Accessors
+
+    //This can't fail
     expr const& get_expr () const {
       return impl_;
     }
@@ -238,7 +238,7 @@ namespace {
 
     //Attempt to get a `const` reference to the list of expressions
     //that this s-expression represents. Throw `std::runtime_error` if
-    //it's not modeling a list
+    //it's not a list
     expr_list const& get_list () const {
       return impl_.match<expr_list const&>(
        [](expr_list const& e) -> expr_list const& { return e; },
@@ -246,7 +246,9 @@ namespace {
      );
     }
 
-    //Obtain a string representation of an s-expression
+    //Conversions
+
+    //Obtain a string representation
     std::string to_string () const { return string_of_expr (impl_); }
   };
 
