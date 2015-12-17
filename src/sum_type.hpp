@@ -51,6 +51,9 @@
 //! \example tree.t.cpp
 //! Dead simple, purely functional binary search tree
 //!
+//! \example sexpr.t.cpp
+//! Rough draft of a type for S-expressions
+//!
 //! \example expression.t.cpp
 //! Abstract syntax trees
 //!
