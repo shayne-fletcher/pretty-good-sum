@@ -7,6 +7,7 @@
 #include <list>
 #include <algorithm>
 #include <iterator>
+#include <sstream>
 
 namespace {
 
@@ -56,6 +57,16 @@ namespace {
   */
   using atom = sum_type<atom_unit, atom_bool, atom_int, atom_float, atom_string>;
 
+  std::string string_of_atom (atom const& a) {
+    return a.match<std::string>(
+      [](atom_unit const&) -> std::string { return "#u"; }
+    , [](atom_bool const& b) -> std::string { return b.val ? "#t" : "f"; }
+    , [](atom_int const& i) -> std::string { return std::to_string (i.val); }
+    , [](atom_float const& f) -> std::string { return std::to_string (f.val); }
+    , [](atom_string const& s) -> std::string { return s.val; }
+    );
+  }
+
   struct expr_atom { 
     atom val; 
     expr_atom (atom const& val) : val (val)
@@ -83,6 +94,26 @@ namespace {
     {}
   };
 
+  std::string string_of_expr (expr const& e) {
+    return e.match<std::string>(
+      [](expr_atom const& a) -> std::string { return string_of_atom (a.val); }
+    , [](expr_list const& l) -> std::string {
+        std::list<expr> const& exprs = l.val;
+        std::list<expr>::const_iterator begin=exprs.begin (), end = exprs.end ();
+        std::ostringstream os;
+        os << "(";
+        while (begin != end) {
+          if (begin != l.val.begin ())
+            os << " ";
+          os << string_of_expr (*begin);
+          ++begin;
+        }
+        os << ")";
+        return os.str ();
+      }
+    );
+  }
+
   struct sexpr {
   private:
     expr impl_;//implementation
@@ -105,7 +136,11 @@ namespace {
     explicit sexpr (double d)
       : impl_{constructor<expr_atom>{}, atom{constructor<atom_float>{}, d}}
     {}
-    //Construct from `std::string`
+    //Construct from `char const*`
+    explicit sexpr (char const* s)
+      : impl_{constructor<expr_atom>{}, atom{constructor<atom_string>{}, std::string (s)}}
+    {}
+    //Construct from `std::string` (r-value ref)
     explicit sexpr (std::string const& s)
       : impl_{constructor<expr_atom>{}, atom{constructor<atom_string>{}, s}}
     {}
@@ -123,7 +158,6 @@ namespace {
        , [](sexpr const& s) -> expr const& { return s.impl_; });
       impl_ = expr{constructor<expr_list>{}, expr_list{std::move (exprs)}};
     }
-
     //Test for unit
     bool is_unit () const {
       return impl_.match<bool>(
@@ -187,6 +221,11 @@ namespace {
       );
     }
   
+    //This can't fail, this s-expression must contain an expression
+    expr const& get_expr () const {
+      return impl_;
+    }
+
     //Attempt to get a `const` reference to the atom this s-expression
     //represents. Throw `std::runtime_error` if the expression is not
     //an atom
@@ -206,22 +245,30 @@ namespace {
        [](otherwise) -> expr_list const& { throw std::runtime_error{"get_list"}; }
      );
     }
+
+    //Obtain a string representation of an s-expression
+    std::string to_string () const { return string_of_expr (impl_); }
   };
 
 }//namespace<anonymous>
 
 TEST (pgs, sexpr) {
 
+  using sexpr_list=std::list<sexpr>;
+
   sexpr s_unit;
   sexpr s_bool{true};
   sexpr s_int{1};
   sexpr s_float{1.0};
   sexpr s_string{std::string{"McCarthy"}};
-  sexpr s_list{std::list<sexpr>{s_unit, s_int, s_float, s_string}};
+  sexpr s_list{sexpr_list{s_unit, s_int, s_float, s_string}};
 
   ASSERT_TRUE (s_bool.is_bool ());
   ASSERT_FALSE (s_int.is_bool ());
 
-  expr_atom const& a = s_int.get_atom ();
-  expr_list const& l = s_list.get_list ();
+  sexpr xpr{sexpr_list{
+      sexpr{"+"}, sexpr{5}, sexpr{sexpr_list{sexpr{"+"}, sexpr{3}, sexpr{5}}}}
+  };
+
+  ASSERT_EQ (xpr.to_string (), std::string{"(+ 5 (+ 3 5))"});
 }
