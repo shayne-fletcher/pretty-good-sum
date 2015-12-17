@@ -133,7 +133,7 @@ namespace {
     {}
     //Construct from `char const*`
     explicit sexpr (char const* s)
-      : impl_{constructor<expr_atom>{}, atom{constructor<atom_string>{}, std::string (s)}}
+      : sexpr{std::string{s}}
     {}
     //Construct from `std::string` (r-value ref)
     explicit sexpr (std::string const& s)
