@@ -84,10 +84,10 @@ T& get (option<T>& u) {
 
 //`default x (Some v)` returns `v` and `default x None` returns `x`
 template <class T>
-T const& default_ (T const& x, option<T> const& u) {
-  return u.match<T const&> (
-    [](some_t<T> const& o) -> T const& { return o.data; },
-    [=](none_t const&) -> T const& { return x; }
+T default_ (T x, option<T> const& u) {
+  return u.match<T> (
+    [](some_t<T> const& o) -> T { return o.data; },
+    [=](none_t const&) -> T { return x; }
   );
 }
 
