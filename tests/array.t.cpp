@@ -24,6 +24,9 @@
 //of view of the client, it is purely applicative. However, the
 //implementation is imperative in nature and the persistence illusory!
 
+//One thing to watch out for here is the massive use of side effects
+//rendering this program seriously multi-thread unfriendly.
+
 //[1] Henry G. Baker. Shallow binding in Lisp 1.5. Commun. ACM,
 //21(7):565-569, 1978.
 //
@@ -32,6 +35,8 @@
 //"http://www.lri.fr/~filliatr/ftp/publis/puf-wml07.ps
 
 namespace {
+
+  namespace detail {
 
   using namespace pgs;
 
@@ -52,7 +57,7 @@ namespace {
   template <class T>
   struct array_t {
     std::vector <T> data;//array data
-    array_t (int n, T const& val) : data (n, val)
+    array_t (std::size_t n, T const& val) : data (n, val)
     {}
     array_t (std::vector<T>&& data) : data (data)
     {}
@@ -64,10 +69,10 @@ namespace {
   //`i` where it contains `v`
   template <class T>
   struct diff_t {
-    int i; //index
+    std::size_t i; //index
     T v;  //value at that index
     persistent_array<T> t;  //the base array
-    diff_t (int i, T const& v, persistent_array<T> const& t) 
+    diff_t (std::size_t i, T const& v, persistent_array<T> const& t) 
       : i (i), v(v), t (t) 
     {}
   };
@@ -86,7 +91,7 @@ namespace {
   //`make (n, val)` returns a persistent array containing `n` copies
   //of `val`
   template <class T>
-  persistent_array<T> make (int n, T const& val) {
+  persistent_array<T> make (std::size_t n, T const& val) {
     return persistent_array<T>{
       new array_data<T>{constructor<array_t<T>>{}, n, val}};
   }
@@ -96,7 +101,7 @@ namespace {
   //the indirection and possibly recursively access another
   //persistent array
   template <class T>
-  T const& get (persistent_array<T> const& t, int i) {
+  T const& get (persistent_array<T> const& t, std::size_t i) {
     return t->match<T const&>(
       [=](array_t<T> const& a) -> T const& { 
         return a.data[i]; 
@@ -111,7 +116,8 @@ namespace {
   //previous versions
   template <class T>
   persistent_array<T> set (
-    persistent_array<T>& t, int i, T const& v) {
+      persistent_array<T> const& t//preserve conceptual 'constness'
+    , std::size_t i, T const& v) {
 
     return t->match<persistent_array<T>>(
       [&t, &v, i](array_t<T>& a) -> persistent_array<T> {
@@ -121,7 +127,7 @@ namespace {
         persistent_array<T> res{
           new array_data<T>{constructor<array_t<T>>{}, std::move (a.data)}};
         //Now, replace the contents of `t` with an indirection
-        *t = array_data<T>{constructor<diff_t<T>>{}, i, old, res};
+        *(const_cast<persistent_array<T>&>(t)) = array_data<T>{constructor<diff_t<T>>{}, i, old, res};
 
         return res;
       }
@@ -160,26 +166,57 @@ namespace {
     return os.str ();
   }
 
+  }//namespace detail
+
+  //Wrap this thing up with an object-oriented facade
+  template <class T>
+  class persistent_array {
+  private:
+    detail::persistent_array<T> impl_;
+
+  private:
+    persistent_array (detail::persistent_array<T> a)
+      : impl_(a)
+    {}
+
+  public: 
+    persistent_array (std::size_t n, T const& val)
+      : impl_ (detail::make (n, val))
+    {}
+
+    T const& get (std::size_t i) const {
+      return detail_::get (impl_, i);
+    } 
+
+    persistent_array<T> set (std::size_t i, T const& val) const {
+      return persistent_array<T>{detail::set (impl_, i, val)};
+    }
+
+    std::string as_string () const {
+      return detail::string_of_persistent_array (impl_);
+    }
+
+  };
+
 }//namespace<anonymous>
 
 TEST (pgs, array) {
 
-  persistent_array<int> a0 = make (7, 0);
-  persistent_array<int> a1 = set (a0, 1, 7);
-  persistent_array<int> a2 = set (a1, 2, 8);
-  persistent_array<int> a3 = set (a1, 2, 9);
+  persistent_array<int> a0{7, 0};
+  persistent_array<int> a1 = a0.set (1, 7);
+  persistent_array<int> a2 = a1.set (2, 8);
+  persistent_array<int> a3 = a1.set (2, 9);
 
   ASSERT_EQ (
-    string_of_persistent_array<int> (a0)
+    a0.as_string ()
   , std::string ("Diff (1, 0, Diff (2, 0, [| 0; 7; 8; 0; 0; 0; 0; |]))"));
   ASSERT_EQ (
-    string_of_persistent_array<int> (a1)
+    a1.as_string ()
   , std::string ("Diff (2, 0, [| 0; 7; 8; 0; 0; 0; 0; |])"));
   ASSERT_EQ (
-    string_of_persistent_array<int> (a2)
+    a2.as_string ()
   , std::string ("[| 0; 7; 8; 0; 0; 0; 0; |]"));
   ASSERT_EQ (
-    string_of_persistent_array<int> (a3)
+    a3.as_string ()
   , std::string ("Diff (2, 9, Diff (2, 0, [| 0; 7; 8; 0; 0; 0; 0; |]))"));
-
 }

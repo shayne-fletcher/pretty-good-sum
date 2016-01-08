@@ -146,16 +146,16 @@ namespace {
      );
   }
 
-  namespace detail {
+  namespace list_detail {
     list<int> range_aux (list<int> const& acc, int const s, int e) {
       if (s >= e) return acc;
       return range_aux (cons (s, acc), s + 1, e);
     };
-  }//namespace detail
+  }//namespace list_detail
 
   //rg - like the Python function 'range'
   list<int> rg (int begin, int end) {
-    return rev (detail::range_aux (nil<int> (), begin, end));
+    return rev (list_detail::range_aux (nil<int> (), begin, end));
   };
 
   //append (catenate two lists - not tail recursive)

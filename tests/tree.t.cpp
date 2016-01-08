@@ -12,7 +12,7 @@ namespace {
 
   using namespace pgs;
 
-  namespace detail {
+  namespace tree_detail {
     //('a, 'b) tree = 
     //  | Empty 
     //  | Node of ('a, 'b) * ('a, 'b) tree * ('a,'b) tree
@@ -181,7 +181,7 @@ namespace {
     template <class K, class V>
       using tree_type = typename node_type<K, V>::tree_type;
 
-  }//namespace detail
+  }//namespace tree_detail
 
   //Dead simple binary search tree - no attempt at balancing
   template <class K, class V>
@@ -190,8 +190,8 @@ namespace {
 
     //These abbreviations will become essential in your efforts to
     //retain some sanity in what follows
-    using empty_type = detail::empty_t;
-    using node_type = detail::node_type<K, V>;
+    using empty_type = tree_detail::empty_t;
+    using node_type = tree_detail::node_type<K, V>;
     using value_type = typename node_type::value_type;
     using tree_type = typename node_type::tree_type;
     using self_type = binary_search_tree<K, V>;
@@ -211,13 +211,13 @@ namespace {
 
     //Test for emptiness
     bool empty () {
-      return detail::empty (impl_);
+      return tree_detail::empty (impl_);
     }
 
     //Apply 'f' to each binding in the tree
     template <class AccT, class F>
     AccT fold (AccT const& z, F f) const {
-      return detail::fold (impl_, z, f);
+      return tree_detail::fold (impl_, z, f);
     }
 
     //Compute a new tree with the same bindings as self but also
@@ -225,7 +225,7 @@ namespace {
     //self, that binding is replaced by `(k, v)`
     template <class P>
     self_type insert (P&& p) const {
-      return self_type { detail::insert (impl_, std::forward<P>(p))};
+      return self_type { tree_detail::insert (impl_, std::forward<P>(p))};
     }
 
     //Compute a new tree with same bindings as self but without a
@@ -245,13 +245,13 @@ namespace {
 
     //True if `k` is bound
     bool contains (K const& k) const {
-      return detail::contains (impl_, k);
+      return tree_detail::contains (impl_, k);
     }
 
     //Get the value bound to `k` in the tree. Raise a
     //`std::runtime_error` if there is no binding for `k`
     V const& lookup (K const& k) const {
-      return detail::lookup (impl_, k);
+      return tree_detail::lookup (impl_, k);
     }
 
     //Extract the bindings in the tree. They'll come back sorted
@@ -292,7 +292,7 @@ namespace {
     //bindings that dont'
     template <class P>
     std::pair<self_type, self_type> partition (P const& p) const {
-      std::pair<tree_type, tree_type> res{detail::partition(impl_, p)};
+      std::pair<tree_type, tree_type> res{tree_detail::partition(impl_, p)};
       return std::make_pair (
        self_type{std::move(res.first)}, self_type{std::move (res.second)});
     }
@@ -311,13 +311,13 @@ namespace {
     //Return the smallest binding (may throw `std::runtime_error` if
     //the tree is empty)
     value_type min_binding () const {
-      return detail::min_binding (impl_);
+      return tree_detail::min_binding (impl_);
     }
 
     //Return the largest binding (may throw `std::runtime_error` if
     //the tree is empty)
     value_type max_binding () const {
-      return detail::max_binding (impl_);
+      return tree_detail::max_binding (impl_);
     }
 
   };
