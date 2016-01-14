@@ -57,9 +57,9 @@ namespace {
   template <class T>
   struct array_t {
     std::vector <T> data;//array data
-    array_t (std::size_t n, T const& val) : data (n, val)
+    array_t (int n, T const& val) : data{n, val}
     {}
-    array_t (std::vector<T>&& data) : data (data)
+    array_t (std::vector<T>&& data) : data {data}
     {}
   };
 
@@ -73,7 +73,7 @@ namespace {
     T v;  //value at that index
     persistent_array<T> t;  //the base array
     diff_t (std::size_t i, T const& v, persistent_array<T> const& t) 
-      : i (i), v(v), t (t) 
+      : i{i}, v{v}, t{t} 
     {}
   };
 
@@ -84,14 +84,14 @@ namespace {
     using base_type = sum_type<array_t<T>, diff_t<T>>;
     template <class U, class... Args>
       array_data (constructor<U> t, Args&&... args)
-      : base_type (t, std::forward<Args>(args)...)
+    : base_type{t, std::forward<Args>(args)...}
     {}
   };
 
   //`make (n, val)` returns a persistent array containing `n` copies
   //of `val`
   template <class T>
-  persistent_array<T> make (std::size_t n, T const& val) {
+  persistent_array<T> make (int n, T const& val) {
     return persistent_array<T>{
       new array_data<T>{constructor<array_t<T>>{}, n, val}};
   }
@@ -176,12 +176,12 @@ namespace {
 
   private:
     persistent_array (detail::persistent_array<T> a)
-      : impl_(a)
+      : impl_{a}
     {}
 
   public: 
-    persistent_array (std::size_t n, T const& val)
-      : impl_ (detail::make (n, val))
+    persistent_array (int n, T const& val)
+      : impl_{detail::make (n, val)}
     {}
 
     T const& get (std::size_t i) const {

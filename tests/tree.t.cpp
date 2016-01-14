@@ -35,9 +35,9 @@ namespace {
       //sub-tree
       template <class P, class U, class V>
       node_t (P&& data, U&& left_child, V&& right_child) 
-        : data (std::forward<P>(data))
-        , left_child (std::forward<U> (left_child))
-        , right_child (std::forward<V> (right_child))
+        : data {std::forward<P>(data)}
+        , left_child {std::forward<U> (left_child)}
+        , right_child {std::forward<V> (right_child)}
       {}
 
       //A node consists of:
@@ -201,7 +201,7 @@ namespace {
 
     //Extension constructor for internal use
     template <class T>
-    binary_search_tree (T&& n) : impl_ (std::forward<T> (n))
+    binary_search_tree (T&& n) : impl_{std::forward<T> (n)}
     {}
 
   public:
@@ -294,7 +294,7 @@ namespace {
     std::pair<self_type, self_type> partition (P const& p) const {
       std::pair<tree_type, tree_type> res{tree_detail::partition(impl_, p)};
       return std::make_pair (
-       self_type{std::move(res.first)}, self_type{std::move (res.second)});
+       self_type{std::move (res.first)}, self_type{std::move (res.second)});
     }
 
     //Computes a tree with the same keys but where `f` has been
