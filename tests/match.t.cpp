@@ -2,6 +2,8 @@
 
 #include "sum_type.hpp"
 
+using namespace BloombergLP;
+
 namespace {
 struct E_const;
 struct E_add;

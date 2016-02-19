@@ -10,6 +10,8 @@
 //! implement conjunctions and disjunctions over variadic predicate
 //! packs.
 
+namespace BloombergLP {
+
 namespace pgs {
 
 //! \brief Fold left, primary template
@@ -84,5 +86,7 @@ struct and_ : fold_left <detail::and_helper, std::true_type, Ts...> {
 };
 
 }//namespace pgs
+
+}//namespace BloombergLP
 
 #endif //!defined (LOGICAL_70B10597_2771_496C_9203_4CD3986547F1_H)

@@ -9,6 +9,8 @@
 
 #  include <type_traits>
 
+namespace BloombergLP {
+
 namespace pgs { 
 
   //! \cond
@@ -40,5 +42,7 @@ namespace pgs {
   };
 
 }//namespace pgs
+
+}//namespace BloombergLP
 
 #endif //!defined(TYPE_TRAITS_FF88A4C7_86DE_434F_93B7_B03DCA5B4578_H)
