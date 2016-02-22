@@ -1,9 +1,9 @@
+#include <pgs/pgs.hpp>
+
 #include <gtest/gtest.h>
 
 #include <sstream>
 #include <iostream>
-
-#include "sum_type.hpp"
 
 namespace {
   using namespace BloombergLP;

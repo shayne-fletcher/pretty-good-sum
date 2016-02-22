@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
+#include <pgs/pgs.hpp>
 
-#include "sum_type.hpp"
+#include <gtest/gtest.h>
 
 #include <iostream>
 #include <cstdlib>

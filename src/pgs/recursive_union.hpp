@@ -8,9 +8,9 @@
 //! The recursive union datatype here is designed to serve as the
 //! implementation mechanism of the sum type.
 
-#  include "logical.hpp"
-#  include "recursive_wrapper.hpp"
-#  include "type_traits.hpp"
+#  include <pgs/logical.hpp>
+#  include <pgs/recursive_wrapper.hpp>
+#  include <pgs/type_traits.hpp>
 
 #  include <stdexcept>
 
