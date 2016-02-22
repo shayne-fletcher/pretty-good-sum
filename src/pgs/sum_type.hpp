@@ -64,7 +64,7 @@
 //! Options are a type that can be either 'None' (undefined) or 'Some
 //! x' for any value 'x'
 
-#  include "recursive_union.hpp"
+#  include <pgs/recursive_union.hpp>
 
 #  include <cstddef>
 #  include <iostream>

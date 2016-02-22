@@ -1,0 +1,6 @@
+#if !defined(C7B3E27A_AEEB_4AE2_A321_9B322110D2AA)
+#  define C7B3E27A_AEEB_4AE2_A321_9B322110D2AA
+
+#  include <pgs/sum_type.hpp>
+
+#endif //!defined(C7B3E27A_AEEB_4AE2_A321_9B322110D2AA)
