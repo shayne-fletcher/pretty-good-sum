@@ -3,6 +3,7 @@
 #include "sum_type.hpp"
 
 namespace {
+  using namespace BloombergLP;
   using namespace pgs;
   
   template <class T> struct cons;

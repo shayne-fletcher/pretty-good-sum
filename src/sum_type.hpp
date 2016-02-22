@@ -69,6 +69,8 @@
 #  include <cstddef>
 #  include <iostream>
 
+namesapce BloombergLP {
+
 namespace pgs {
 
 //! \brief A utility suitable for use as a wildcard in a pattern
@@ -352,5 +354,7 @@ bool operator != (sum_type<Ts...> const& u, sum_type<Ts...> const& v) {
 }
 
 }//namespace pgs
+
+}//namespace BloombergLP
 
 #endif //!defined(SUM_F8718480_DC1C_4410_84C0_DDDA2C2FED94_H)

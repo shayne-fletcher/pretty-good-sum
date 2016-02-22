@@ -38,6 +38,7 @@ namespace {
 
   namespace detail {
 
+  using namespace BloombergLP;
   using namespace pgs;
 
   //The goal here is an efficient solution to the problem of
