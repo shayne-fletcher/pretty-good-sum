@@ -13,6 +13,8 @@
 #  include <pgs/type_traits.hpp>
 
 #  include <stdexcept>
+#  include <type_traits>
+#  include <iostream>
 
 namespace BloombergLP {
 
@@ -35,22 +37,22 @@ namespace pgs {
 
     //! \brief Produce a non-`const` reference to the value field of
     //! the provided union
-    static constexpr auto& ref (recursive_union<T, Ts...>& u) {
+    static constexpr T& ref (recursive_union<T, Ts...>& u) {
       return u.v;
     }
     //! \brief Produce a `const` reference to the value field of the
     //! provided union
-    static constexpr auto const& ref (recursive_union<T, Ts...> const& u) {
+    static constexpr T const& ref (recursive_union<T, Ts...> const& u) {
       return u.v;
     }
     //! \brief Produce a non-`const` pointer to the value field of the
     //! provided union
-    static constexpr auto* ptr (recursive_union<T, Ts...>& u) {
+    static constexpr T* ptr (recursive_union<T, Ts...>& u) {
       return std::addressof (u.v);
     }
     //! \brief Produce a `const` pointer to the value field of the
     //! provided union
-    static constexpr auto const* ptr (recursive_union<T, Ts...> const& u) {
+    static constexpr T const* ptr (recursive_union<T, Ts...> const& u) {
       return std::addressof (u.v);
     }
   };
@@ -63,22 +65,26 @@ namespace pgs {
 
     //! \brief Produce a non-`const` reference to the object referred
     //! to by the value field of the provided union
-    static auto& ref (recursive_union<T, Ts...>& u) {
-    return u.v.get ();
+    static auto ref (recursive_union<T, Ts...>& u)
+      -> decltype (u.v.get ())& {
+      return u.v.get ();
     }
     //! \brief Produce a `const` reference to the object referred
     //! to by the value field of the provided union
-    static auto const& ref (recursive_union<T, Ts...> const& u) {
+    static auto ref (recursive_union<T, Ts...> const& u)
+      -> decltype (u.v.get ()) const& {
       return u.v.get ();
     }
     //! \brief Produce a non-`const` pointer to the object referred
     //! to by the value field of the provided union
-    static constexpr auto* ptr (recursive_union<T, Ts...>& u) {
+    static constexpr auto ptr (recursive_union<T, Ts...>& u) 
+      -> decltype (u.v.get ())* {
       return std::addressof (u.v.get ());
     }
     //! \brief Produce a `const` pointer to the object referred
     //! to by the value field of the provided union
-    static constexpr auto const* ptr (recursive_union<T, Ts...> const& u) {
+    static constexpr auto ptr (recursive_union<T, Ts...> const& u) 
+      -> decltype (u.v.get ()) const*  {
       return std::addressof (u.v.get ());
     }
   };
@@ -89,19 +95,25 @@ namespace pgs {
   struct recursive_union_indexer {
 
     //!\brief Decrement `I`, strip off `T` and recurse
-    static constexpr auto& ref (recursive_union<T, Ts...>& u) {
+    static constexpr auto ref (recursive_union<T, Ts...>& u)
+      -> decltype (recursive_union_indexer<I - 1, Ts...>::ref (u.r))
+    {
       return recursive_union_indexer<I - 1, Ts...>::ref (u.r);
     }
     //!\brief Decrement `I`, strip off `T` and recurse
-    static constexpr auto const& ref (recursive_union<T, Ts...> const& u) {
+    static constexpr auto ref (recursive_union<T, Ts...> const& u) 
+      -> decltype (recursive_union_indexer<I - 1, Ts...>::ref (u.r))
+    {
       return recursive_union_indexer<I - 1, Ts...>::ref (u.r);
     }
     //!\brief Decrement `I`, strip off `T` and recurse
-    static constexpr auto* ptr (recursive_union<T, Ts...>& u) {
+    static constexpr auto ptr (recursive_union<T, Ts...>& u) 
+      -> decltype (recursive_union_indexer<I - 1, Ts...>::ptr (u.r)) {
       return recursive_union_indexer<I - 1, Ts...>::ptr (u.r);
     }
     //!\brief Decrement `I`, strip off `T` and recurse
-    static constexpr auto const* ptr (recursive_union<T, Ts...> const& u) {
+    static constexpr auto ptr (recursive_union<T, Ts...> const& u) 
+      -> decltype (recursive_union_indexer<I - 1, Ts...>::ptr (u.r)) {
       return recursive_union_indexer<I - 1, Ts...>::ptr (u.r);
     }
   };
@@ -112,22 +124,26 @@ namespace pgs {
   struct recursive_union_indexer<0, T, Ts...> {
     //! \brief Dereference the value field to produce a non-`const`
     //! reference
-    static constexpr auto& ref (recursive_union<T, Ts...>& u) {
+    static constexpr auto ref (recursive_union<T, Ts...>& u) 
+      -> decltype (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u)) {
       return recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u);
     }
     //! \brief Dereference the value field to produce a `const`
     //! reference
-    static constexpr auto const& ref (recursive_union<T, Ts...> const& u) {
+    static constexpr auto ref (recursive_union<T, Ts...> const& u) 
+      -> decltype (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u)) {
       return recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u);
     }
     //! \brief Dereference the value field to produce a non-`const`
     //! pointer
-    static constexpr auto* ptr (recursive_union<T, Ts...>& u) {
+    static constexpr auto ptr (recursive_union<T, Ts...>& u) 
+      -> decltype (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u))* {
       return std::addressof (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u));
     }
     //! \brief Dereference the value field to produce a `const`
     //! pointer
-    static constexpr auto const* ptr (recursive_union<T, Ts...> const& u) {
+    static constexpr auto ptr (recursive_union<T, Ts...> const& u) 
+      -> decltype (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u)) const* {
       return std::addressof (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u));
     }
   };
@@ -603,37 +619,36 @@ namespace pgs {
     recursive_union () 
     {}
   
-    //! \brief Construct (a `T`) into `v`
+    //! \brief Construct a `T` into `v`
+    //!
+    //! `T` and `U` are the same
     template <class... Args>
     explicit recursive_union (constructor<T>, Args&&... args) 
       : v (std::forward<Args>(args)...)
     {}
-  
+
     //! \brief Construct (a `recursive_wrapper<T>`) into `v`
     //!
-    //! `U` is not `T` but `T` is a recursive wrapper and `U`
-    //! is the type contained in `T`
+    //! `T` and `U` are different but `T` is a recursive wrapper and
+    //! `U` is the type contained in `T`
+
     template <class U, class... Args,
     std::enable_if_t<
        and_<
-        is_recursive_wrapper<T>
-      , std::is_same<U, recursive_wrapper_unwrap_t<T>>>::value, int> = 0
+         is_recursive_wrapper<T>
+         , std::is_same<U, recursive_wrapper_unwrap_t<T>>>::value, int> = 0
     >
     explicit recursive_union (constructor<U>, Args&&... args)
       noexcept (std::is_nothrow_constructible<U, Args...>::value)
     : v (std::forward<Args>(args)...)
     {}
-  
+
     //! \brief Construct into `r`
     //!
-    //! `U` is not `T` and `T` is not a recursive wrapper or,
-    //! `U` is not the type contained in `T`
-    template <class U, class... Args,
-    std::enable_if_t<
-      !and_<
-        is_recursive_wrapper<T>
-      , std::is_same<U, recursive_wrapper_unwrap_t<T>>>::value, int> = 0
-    >
+    //! `T` and `U` are different and `T` is not a reference wrapper
+    //! with `U` the type contained in `T`.
+
+    template <class U, class... Args>
     explicit recursive_union (constructor<U> t, Args&&... args)
       noexcept(
          std::is_nothrow_constructible<Ts..., constructor<U>, Args...>::value

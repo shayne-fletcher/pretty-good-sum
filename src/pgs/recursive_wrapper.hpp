@@ -10,6 +10,7 @@
 //! \copyright Copyright Shayne Fletcher, 2015
 
 #include <type_traits>
+#include <utility> // std::forward<>()
 
 namespace BloombergLP {
 

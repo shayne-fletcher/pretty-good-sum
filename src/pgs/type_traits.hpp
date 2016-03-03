@@ -9,6 +9,21 @@
 
 #  include <type_traits>
 
+#  if defined (__GNUC__)
+#    if __cplusplus <= 201103L
+namespace std {
+
+  template <bool B, class T = void>
+  using enable_if_t = typename enable_if<B, T>::type; //C++14
+
+  template <class B>
+  struct negation : std::integral_constant <bool, !B::value>
+  {}; // C++17
+  
+}//namespace std
+#  endif //__cplusplus <= 201103L
+#endif//defined (__GNU_C)
+
 namespace BloombergLP {
 
 namespace pgs { 
