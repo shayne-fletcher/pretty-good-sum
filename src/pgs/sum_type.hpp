@@ -69,7 +69,7 @@
 #  include <cstddef>
 #  include <iostream>
 
-namesapce BloombergLP {
+namespace BloombergLP {
 
 namespace pgs {
 
@@ -134,7 +134,8 @@ namespace detail {
   template <std::size_t I, class... Ts>
   struct get_sum_type_element {
 
-    static auto& get (sum_type<Ts...>& u) {
+    static auto get (sum_type<Ts...>& u) 
+      -> decltype (recursive_union_indexer<I, Ts...>::ref (u.data)) {
       if (u.cons != I){
         std::string message;
         message += "Indexing with ";
@@ -147,7 +148,9 @@ namespace detail {
       return recursive_union_indexer<I, Ts...>::ref (u.data);
     }
 
-    static auto const& get (sum_type<Ts...> const& u) {
+    static auto get (sum_type<Ts...> const& u) 
+      -> decltype (recursive_union_indexer<I, Ts...>::ref (u.data))
+    {
       if (u.cons != I){
         std::string message;
         message += "Indexing with ";
