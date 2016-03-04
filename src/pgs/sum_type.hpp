@@ -4,7 +4,7 @@
 //! \file sum.hpp
 //!
 //! \copyright Copyright Björn Aili, 2013
-//! \copyright Copyright Shayne Fletcher, 2015
+//! \copyright Copyright Shayne Fletcher, 2015-2016
 
 /*
  * Copyright (c) 2013 Björn Aili

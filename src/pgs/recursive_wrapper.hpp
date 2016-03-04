@@ -7,7 +7,7 @@
 //!
 //! \copyright Copyright Eric Friedman, Itay Maman 2002-2003 (Boost
 //! software license)
-//! \copyright Copyright Shayne Fletcher, 2015
+//! \copyright Copyright Shayne Fletcher, 2015-2016
 
 #include <pgs/type_traits.hpp>
 
