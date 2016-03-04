@@ -28,6 +28,10 @@ namespace BloombergLP {
 
 namespace pgs { 
 
+  //! \brief Convenience metafunction
+  template <class T, class U>
+  using not_is_same = std::negation<std::is_same<T, U>>;
+
   //! \cond
   namespace detail {
     struct no {};

@@ -9,7 +9,8 @@
 //! software license)
 //! \copyright Copyright Shayne Fletcher, 2015
 
-#include <type_traits>
+#include <pgs/type_traits.hpp>
+
 #include <utility> // std::forward<>()
 
 namespace BloombergLP {
@@ -36,6 +37,10 @@ template <class T>
 struct is_recursive_wrapper<recursive_wrapper<T>> : std::true_type 
 {};
 
+//! \brief Negation of the `is_recursive_wrapper<>` metafunction
+template <class T>
+using not_is_a_recursive_wrapper = std::negation<is_recursive_wrapper<T>>;
+  
 //! \brief Primary template of a metafunction to compute the type
 //! contained by a `recursive_wrapper<>`.
 //
@@ -59,9 +64,21 @@ template <class W>
 using recursive_wrapper_unwrap_t = 
   typename recursive_wrapper_unwrap<W>::type;
 
-//! \class recursive_wrapper<>
-//!
-//! \brief A type to enable working around the absence of recursive
+//! \brief Metafunction to determine if `T` is a `recursive_wrapper<>`
+//! with underlying type `U`
+template <class T, class U>
+using is_recursive_wrapper_containing =
+  and_<
+      is_recursive_wrapper<T>
+    , std::is_same<U, recursive_wrapper_unwrap_t<T>>
+  >;
+
+//! \brief Negation of the `is_recursive_wrapper_containing<>`
+//! metafunction
+template <class T, class U>
+using not_is_recursive_wrapper_containing =
+  std::negation<is_recursive_wrapper_containing<T, U>>;
+
 //! types
 template <class T>
 class recursive_wrapper {
