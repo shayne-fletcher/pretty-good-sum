@@ -12,38 +12,26 @@
 //So, there are a few things I'd like to use that I have to borrow
 //from the future.
 
-#  if defined (__GNUC__)
-#    if __cplusplus <= 201103L //g++-4.8
-namespace std {
-
-  template <bool B, class T = void>
-  using enable_if_t = typename enable_if<B, T>::type; //C++14
-
-  template <class B>
-  struct negation : std::integral_constant <bool, !B::value>
-  {}; // C++17
-  
-}//namespace std
-#  endif //__cplusplus <= 201103L
-#endif//defined (__GNU_C)
-
-#if defined (_MSC_VER)&&(_MSC_VER == 1900) //msvc-14
-namespace std {
-
-  template <class B>
-  struct negation : std::integral_constant <bool, !B::value>
-  {}; // C++17
-
-}//namespace std
-#endif//defined (_MSC_VER)&&(_MSC_VER == 1900)
-
 namespace BloombergLP {
 
 namespace pgs { 
 
+  //-- Borrow from the future
+
+  //C++14
+  template <bool B, class T = void>
+  using enable_if_t = typename std::enable_if<B, T>::type;
+
+ // C++17
+  template <class B>
+  struct negation : std::integral_constant <bool, !B::value>
+  {};
+
+  //--
+  
   //! \brief Convenience metafunction
   template <class T, class U>
-  using not_is_same = std::negation<std::is_same<T, U>>;
+  using not_is_same = negation<std::is_same<T, U>>;
 
   //! \cond
   namespace detail {

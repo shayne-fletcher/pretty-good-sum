@@ -39,7 +39,7 @@ struct is_recursive_wrapper<recursive_wrapper<T>> : std::true_type
 
 //! \brief Negation of the `is_recursive_wrapper<>` metafunction
 template <class T>
-using not_is_a_recursive_wrapper = std::negation<is_recursive_wrapper<T>>;
+using not_is_a_recursive_wrapper = negation<is_recursive_wrapper<T>>;
   
 //! \brief Primary template of a metafunction to compute the type
 //! contained by a `recursive_wrapper<>`.
@@ -77,7 +77,7 @@ using is_recursive_wrapper_containing =
 //! metafunction
 template <class T, class U>
 using not_is_recursive_wrapper_containing =
-  std::negation<is_recursive_wrapper_containing<T, U>>;
+  negation<is_recursive_wrapper_containing<T, U>>;
 
 //! types
 template <class T>
