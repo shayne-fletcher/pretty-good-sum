@@ -16,6 +16,10 @@ namespace pgs {
   //-- Borrow from the future
 
   //C++14
+  template <class T>
+  using decay_t = typename::decay<T>::type;
+
+  //C++14
   template <bool B, class T = void>
   using enable_if_t = typename std::enable_if<B, T>::type;
 
