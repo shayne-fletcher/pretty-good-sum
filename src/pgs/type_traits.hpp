@@ -17,7 +17,7 @@ namespace pgs {
 
   //C++14
   template <class T>
-  using decay_t = typename::decay<T>::type;
+  using decay_t = typename std::decay<T>::type;
 
   //C++14
   template <bool B, class T = void>

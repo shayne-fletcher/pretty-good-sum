@@ -632,7 +632,7 @@ namespace pgs {
     //! `T` and `U` are different but `T` is a recursive wrapper and
     //! `U` is the type contained in `T`
     template <class U, class... Args,
-    std::enable_if_t<
+    pgs::enable_if_t<
       is_recursive_wrapper_containing<T, U>::value, int> = 0
     >
     explicit recursive_union (constructor<U>, Args&&... args)
@@ -645,7 +645,7 @@ namespace pgs {
     //! `T` and `U` are different and `T` is not a reference wrapper
     //! with `U` the type contained in `T`.
    template <class U, class... Args,
-   std::enable_if_t<
+   pgs::enable_if_t<
       and_<
           not_is_same<T, U>
         , not_is_recursive_wrapper_containing<T, U>>::value, int> = 0
