@@ -168,7 +168,7 @@ namespace pgs {
     //! \brief `f` is callable on `t` (of type `T const&`)
     template <
       class O, class F, class... Fs,
-      class = typename std::enable_if<is_callable<F, T>::value>::type
+      class = pgs::enable_if_t<is_callable<F, T>::value, void>
       >
     static result_type visit (overload_tag<O>, T const& t, F&& f, Fs&&...) {
       return std::forward<F>(f)(t);
@@ -177,7 +177,7 @@ namespace pgs {
     //! recurse
     template <
       class F, class O, class... Fs,
-      class = typename std::enable_if<!is_callable<F, T>::value>::type
+      class = pgs::enable_if_t<!is_callable<F, T>::value, void>
       >
     static result_type visit (overload_tag<O> o, T const& t, F&&, Fs&&... fs) {
       return recursive_union_visitor::visit (o, t, std::forward<Fs>(fs)...);
@@ -185,7 +185,7 @@ namespace pgs {
     //! \brief `f` is callable on `t` (of type `T&`)
     template <
       class O, class F, class... Fs,
-      class = typename std::enable_if<is_callable<F, T>::value>::type
+      class = pgs::enable_if_t<is_callable<F, T>::value, void>
       >
     static result_type visit (overload_tag<O>, T& t, F&& f, Fs&&...) {
       return std::forward<F>(f)(t);
@@ -193,7 +193,7 @@ namespace pgs {
     //! \brief `f` is not callable on `t` (of type `T&`)
     template <
       class F, class O, class... Fs,
-      class = typename std::enable_if<!is_callable<F, T>::value>::type
+      class = pgs::enable_if_t<!is_callable<F, T>::value, void>
       >
     static result_type visit (overload_tag<O> o, T& t, F&&, Fs&&...fs) {
       return recursive_union_visitor::visit (o, t, std::forward<Fs>(fs)...);
@@ -216,7 +216,7 @@ namespace pgs {
     //! \brief `f` is callable on `t` (of type `T const&`)
     template <
       class O, class F, class... Fs,
-      class = typename std::enable_if<is_callable<F, T>::value>::type
+      class = pgs::enable_if_t<is_callable<F, T>::value, void>
       >
     static result_type visit (overload_tag<O>, T const& t, F&& f, Fs&&...) {
       std::forward<F>(f)(t);
@@ -225,7 +225,7 @@ namespace pgs {
     //! recurse
     template <
       class F, class O, class... Fs,
-      class = typename std::enable_if<!is_callable<F, T>::value>::type
+      class = pgs::enable_if_t<!is_callable<F, T>::value, void>
       >
     static result_type visit (overload_tag<O> o, T const& t, F&&, Fs&&... fs) {
       recursive_union_visitor::visit (o, t, std::forward<Fs>(fs)...);
@@ -233,7 +233,7 @@ namespace pgs {
     //! \brief `f` is callable on `t` (of type `T&`)
     template <
       class O, class F, class... Fs,
-      class = typename std::enable_if<is_callable<F, T>::value>::type
+      class = pgs::enable_if<is_callable<F, T>::value, void>
       >
     static result_type visit (overload_tag<O>, T& t, F&& f, Fs&&...) {
       std::forward<F>(f)(t);
@@ -241,7 +241,7 @@ namespace pgs {
     //! \brief `f` is not callable on `t` (of type `T&`)
     template <
       class F, class O, class... Fs,
-      class = typename std::enable_if<!is_callable<F, T>::value>::type
+      class = pgs::enable_if<!is_callable<F, T>::value, void>
       >
     static result_type visit (overload_tag<O> o, T& t, F&&, Fs&&...fs) {
       recursive_union_visitor::visit (o, t, std::forward<Fs>(fs)...);
