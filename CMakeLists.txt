@@ -16,14 +16,10 @@ find_package(Doxygen)
 
 # Non-standard modules (thanks Juan!)
 
-if (DEFINED ENV{CMAKE_MODULE_PATH})
-  set (CMAKE_MODULE_PATH $ENV{CMAKE_MODULE_PATH})
-else()
-  set (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
-endif(DEFINED ENV{CMAKE_MODULE_PATH})
+set (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 message (CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH})
-
+find_package(Robo)
 find_package(GoogleTest REQUIRED) #Google test
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
@@ -39,10 +35,10 @@ endif()
 # Library
 
 set(PGS_HPP 
-	${CMAKE_CURRENT_SOURCE_DIR}/src/logical.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/recursive_wrapper.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/recursive_union.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/sum_type.hpp
+	src/logical.hpp
+	src/recursive_wrapper.hpp
+	src/recursive_union.hpp
+	src/sum_type.hpp
 )
 set(PGS_CPP) #There are no .cpp files
 
