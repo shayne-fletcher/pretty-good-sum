@@ -13,7 +13,8 @@ using namespace pgs;
 //`E_const` expressions store their constant value
 struct E_const { 
   int i; 
-  explicit E_const (int i) : i (i) {} 
+  explicit E_const (int i) : i {i} 
+  {} 
 };
 
 struct E_add;   //addition expression
@@ -33,15 +34,18 @@ using xpr_t = sum_type<
 
 //Addition expressions contain a left operand and a right operand
 struct E_add {
+  int i;
   xpr_t l, r;
-  E_add (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+  E_add (xpr_t const& l, xpr_t const& r) : l {l}, r {r}, i {0}
   {}
+  int incr () { return ++i; }
+  
 };
 
 //Subtraction expressions contain a left operand and a right operand
 struct E_sub {
   xpr_t l, r;
-  E_sub (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+  E_sub (xpr_t const& l, xpr_t const& r) : l {l}, r {r} 
   {}
 };
 
@@ -49,7 +53,7 @@ struct E_sub {
 //operand
 struct E_mul {
   xpr_t l, r;
-  E_mul (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+  E_mul (xpr_t const& l, xpr_t const& r) : l {l}, r {r} 
   {}
 };
 
@@ -57,7 +61,7 @@ struct E_mul {
 //operand
 struct E_div {
   xpr_t l, r;
-  E_div (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+  E_div (xpr_t const& l, xpr_t const& r) : l {l}, r {r} 
   {}
 };
 
@@ -68,19 +72,19 @@ inline xpr_t cst (int i) {
 }
 template <class L, class R>
 inline xpr_t add (L&& l, R&& r) {
-  return xpr_t {constructor<E_add>{}, std::forward<L>(l), std::forward<R>(r) };
+  return xpr_t {constructor<E_add>{}, std::forward<L> (l), std::forward<R> (r) };
 }
 template <class L, class R>
 inline xpr_t sub (L&& l, R&& r) {
-  return xpr_t{constructor<E_sub>{}, std::forward<L>(l), std::forward<R>(r) };
+  return xpr_t{constructor<E_sub>{}, std::forward<L> (l), std::forward<R> (r) };
 }
 template <class L, class R>
 inline xpr_t mul (L&& l, R&& r) {
-  return xpr_t{constructor<E_mul>{}, std::forward<L>(l), std::forward<R>(r) };
+  return xpr_t{constructor<E_mul>{}, std::forward<L> (l), std::forward<R> (r) };
 }
 template <class L, class R>
 inline xpr_t div (L&& l, R&& r) {
-  return xpr_t{constructor<E_div>{}, std::forward<L>(l), std::forward<R>(r) };
+  return xpr_t{constructor<E_div>{}, std::forward<L> (l), std::forward<R> (r) };
 }
 
 //An `ostream` "inserter" for expressions
@@ -103,6 +107,7 @@ int main () {
 
   //d=5
   xpr_t d = cst (5);
+
   //xpr = n/d = (2 + 3)/5
   xpr_t xpr = div (n, d);
 

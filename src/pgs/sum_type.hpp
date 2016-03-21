@@ -68,6 +68,7 @@
 
 #  include <cstddef>
 #  include <iostream>
+#  include <string>
 
 namespace BloombergLP {
 
@@ -225,6 +226,10 @@ public:
   //! `match` procedure, non-`const` overoad
   template <class... Fs> void match(Fs&&... fs);
 
+  //! The currently active `v` is a `T`?
+  template<class T>
+  constexpr bool is () const noexcept;
+
   //! The currently active `v` is at position `I`?
   template<std::size_t I>
   constexpr bool is_type_at () const noexcept;
@@ -315,10 +320,44 @@ void sum_type<Ts...>::match(Fs&&... fs) {
 }
 
 template <class... Ts>
+  template <class T>
+constexpr bool sum_type<Ts...>::is () const noexcept {
+  return cons == index_of<T, Ts...>::value;
+}
+
+template <class... Ts>
   template <std::size_t I>
 constexpr bool sum_type<Ts...>::is_type_at () const noexcept {
   return cons == I;
 }
+//! \endcond
+
+//! \brief Attempt to get at the value contained in a sum indexed by
+//! type
+
+template<class T, class ... Ts>
+constexpr T const& get (sum_type<Ts...> const& s);
+
+//! \brief Attempt to get at the value contained in a sum indexed by
+//! type
+
+template<class T, class ... Ts>
+constexpr T& get (sum_type<Ts...>& s);
+
+//! \cond
+
+template<class T, class ... Ts>
+constexpr T const& get (sum_type<Ts...> const& s) {
+  return detail::get_sum_type_element<
+    index_of<T, Ts...>::value, Ts...>::get (s);
+}
+
+template<class T, class ... Ts>
+constexpr T& get (sum_type<Ts...>& s) {
+  return detail::get_sum_type_element<
+    index_of<T, Ts...>::value, Ts...>::get (s);
+}
+
 //! \endcond
 
 //! \brief Attempt to get at the value contained in a sum

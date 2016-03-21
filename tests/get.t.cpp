@@ -19,7 +19,7 @@ namespace {
   
     template <class U, class V>
     cons_t (U&& hd, V&& tl) :
-      hd (std::forward<U> (hd)), tl (std::forward<V>(tl)) {
+      hd {std::forward<U> (hd)}, tl {std::forward<V>(tl)} {
     }
 
   };

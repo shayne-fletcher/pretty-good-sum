@@ -40,7 +40,7 @@ namespace {
   
     template <class U, class V>
     cons_t (U&& hd, V&& tl) :
-      hd (std::forward<U> (hd)), tl (std::forward<V>(tl)) {
+      hd {std::forward<U> (hd)}, tl {std::forward<V>(tl)} {
     }
   };
 
@@ -59,14 +59,14 @@ namespace {
   //A factory function for a `nil_t` (a constant)
   template <class T>
   constexpr list<T> nil () {
-    return list<T>{constructor<nil_t>{}};
+    return list<T>{ constructor<nil_t>{} };
   }
 
   //Factory function for a `cons_t<T>`
   template <class U, class V>
   inline std::remove_cv_t<std::remove_reference_t<V>> cons (U&& hd, V&& tl) {
     using t = list_value_type_t<std::remove_cv_t<std::remove_reference_t<V>>>;
-    return list<t>{constructor<cons_t<t>>{}, std::forward<U>(hd), std::forward<V>(tl) };
+    return list<t> {constructor<cons_t<t>>{}, std::forward<U>(hd), std::forward<V>(tl) };
   }
 
   //hd

@@ -78,13 +78,13 @@ namespace pgs {
     //! \brief Produce a non-`const` pointer to the object referred
     //! to by the value field of the provided union
     static constexpr auto ptr (recursive_union<T, Ts...>& u) 
-      -> decltype (u.v.get ())* {
+      -> decltype (std::addressof (u.v.get ())) {
       return std::addressof (u.v.get ());
     }
     //! \brief Produce a `const` pointer to the object referred
     //! to by the value field of the provided union
     static constexpr auto ptr (recursive_union<T, Ts...> const& u) 
-      -> decltype (u.v.get ()) const*  {
+      -> decltype (std::addressof (u.v.get ())) const  {
       return std::addressof (u.v.get ());
     }
   };
@@ -137,14 +137,14 @@ namespace pgs {
     //! \brief Dereference the value field to produce a non-`const`
     //! pointer
     static constexpr auto ptr (recursive_union<T, Ts...>& u) 
-      -> decltype (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u))* {
-      return std::addressof (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u));
+      -> decltype ((recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ptr (u))) {
+      return recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ptr (u);
     }
     //! \brief Dereference the value field to produce a `const`
     //! pointer
     static constexpr auto ptr (recursive_union<T, Ts...> const& u) 
-      -> decltype (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u)) const* {
-      return std::addressof (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ref (u));
+      -> decltype (recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ptr (u)) {
+      return recursive_union_dereference<is_recursive_wrapper<T>::value, T, Ts...>::ptr (u);
     }
   };
 
