@@ -16,17 +16,20 @@ find_package(Doxygen)
 
 # Non-standard modules (thanks Juan!)
 
-if (DEFINED ENV{CMAKE_MODULE_PATH})
-  set (CMAKE_MODULE_PATH $ENV{CMAKE_MODULE_PATH})
-else()
-  set (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
-endif(DEFINED ENV{CMAKE_MODULE_PATH})
+set (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 message (CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH})
-
+find_package(Robo)
 find_package(GoogleTest REQUIRED) #Google test
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_C_STANDARD 99)
+# With Clang we force C++11 + C99
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 if(MSVC)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE")
@@ -39,47 +42,18 @@ endif()
 # Library
 
 set(PGS_HPP 
-	${CMAKE_CURRENT_SOURCE_DIR}/src/logical.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/recursive_wrapper.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/recursive_union.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/sum_type.hpp
+    src/pgs/logical.hpp
+    src/pgs/recursive_wrapper.hpp
+    src/pgs/recursive_union.hpp
+    src/pgs/sum_type.hpp
 )
-set(PGS_CPP) #There are no .cpp files
 
 #Install
 
 INSTALL(FILES ${PGS_HPP} DESTINATION include) #Headers
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/images DESTINATION share/doc/images) #Images
 
-SET(PGS_TESTS_CPP 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/expression.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/match.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/get.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/list.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/tree.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/array.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/sexpr.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/option.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/move.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/copy.t.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/main.t.cpp
-)
-ADD_EXECUTABLE(pgs_test ${PGS_TESTS_CPP})
-TARGET_INCLUDE_DIRECTORIES(pgs_test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-TARGET_INCLUDE_DIRECTORIES(pgs_test SYSTEM PUBLIC ${GTEST_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(pgs_test ${GTEST_LIBRARIES})
-
-#Set header path for tests
-
-TARGET_INCLUDE_DIRECTORIES(pgs_test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-#TARGET_INCLUDE_DIRECTORIES(pgs_test SYSTEM PUBLIC ${GTEST_INCLUDE_DIRS} )
-#TARGET_LINK_LIBRARIES(pgs_test ${GTEST_LIBRARIES} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-
-INSTALL(TARGETS pgs_test
-    RUNTIME DESTINATION bin
-	LIBRARY DESTINATION lib${INSTALL_LIB_DIR_SUFFIX}
-	ARCHIVE DESTINATION lib${INSTALL_LIB_DIR_SUFFIX}
-	)
+ADD_SUBDIRECTORY(tests)
 
 if(BUILD_DOCUMENTATION)
     if(NOT DOXYGEN_FOUND)
