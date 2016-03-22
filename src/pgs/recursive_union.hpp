@@ -66,13 +66,13 @@ namespace pgs {
     //! \brief Produce a non-`const` reference to the object referred
     //! to by the value field of the provided union
     static auto ref (recursive_union<T, Ts...>& u)
-      -> decltype (u.v.get ())& {
+      -> decltype (u.v.get ()) {
       return u.v.get ();
     }
     //! \brief Produce a `const` reference to the object referred
     //! to by the value field of the provided union
     static auto ref (recursive_union<T, Ts...> const& u)
-      -> decltype (u.v.get ()) const& {
+      -> decltype (u.v.get ()) {
       return u.v.get ();
     }
     //! \brief Produce a non-`const` pointer to the object referred
@@ -84,7 +84,7 @@ namespace pgs {
     //! \brief Produce a `const` pointer to the object referred
     //! to by the value field of the provided union
     static constexpr auto ptr (recursive_union<T, Ts...> const& u) 
-      -> decltype (std::addressof (u.v.get ())) const  {
+      -> decltype (std::addressof (u.v.get ())) {
       return std::addressof (u.v.get ());
     }
   };
