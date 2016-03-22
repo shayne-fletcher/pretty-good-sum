@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "sum_type.hpp"
+#include <pgs/sum_type.hpp>
 
 #include <string>
 #include <utility>
@@ -34,11 +34,11 @@ namespace {
 
       //Construct a `node_t` from `data`, a `left` and a `right`
       //sub-tree
-      template <class P, class U, class V>
-      node_t (P&& data, U&& left_child, V&& right_child) 
-        : data {std::forward<P>(data)}
-        , left_child {std::forward<U> (left_child)}
-        , right_child {std::forward<V> (right_child)}
+      template <class D, class L, class R>
+      node_t (D&& data, L&& left_child, R&& right_child) 
+        : data {std::forward<D>(data)}
+        , left_child {std::forward<L> (left_child)}
+        , right_child {std::forward<R> (right_child)}
       {}
 
       //A node consists of:
@@ -49,15 +49,15 @@ namespace {
 
     template <class K, class V>
     bool empty (tree<K, V> const& t) {
-      return t.match<bool>(
-       [](empty_t) { return true; },
-       [](node_t<K, V> const&) { return false; }
+      return t.template match<bool>(
+       [](empty_t) -> bool { return true; },
+       [](node_t<K, V> const&) -> bool { return false; }
        );
     }
 
     template <class K, class V, class AccT, class F>
     AccT fold (tree<K, V> const& t, AccT const& z, F f) {
-      return t.match<AccT>(
+      return t.template match<AccT>(
        [&z](empty_t const&) -> AccT { return z; },
        [=, &z](node_t<K, V> const& n) -> AccT {
          auto const& b = n.data;
@@ -70,7 +70,7 @@ namespace {
 
     template <class K, class V, class P>
     tree<K, V> insert (tree<K, V> const& t, P&& p) {
-      return t.match<tree<K, V>> (
+      return t.template match<tree<K, V>> (
          [&p](empty_t) { 
          return tree<K, V>{
             constructor<node_t<K, V>>{}
@@ -103,7 +103,7 @@ namespace {
 
     template <class K, class V>
     bool contains (tree<K, V> const& t, K const& k) {
-      return t.match<bool>(
+      return t.template match<bool>(
         [](empty_t) { return false; },
         [&k](node_t<K, V> const& n) {
           auto const& a = n.data.first;
@@ -118,7 +118,7 @@ namespace {
 
     template <class K, class V>
     V const& lookup (tree<K, V> const& t, K const& k) {
-      return t.match<V const&>(
+      return t.template match<V const&>(
         [](empty_t const&) -> V const& { 
           throw std::runtime_error{"lookup"}; 
         },
@@ -135,7 +135,7 @@ namespace {
 
     template <class K, class V, class P>
     std::pair<tree<K, V>, tree<K, V>> partition (tree<K, V> const& t, P const& p) {
-      auto f = [&p](auto const& acc, std::pair<K, V> const& b) {
+      auto f = [&p](std::pair<tree<K, V>, tree<K, V>> const& acc, std::pair<K, V> const& b) {
         auto const& l = acc.first;
         auto const& r = acc.second;
         if (p (b))
@@ -148,7 +148,7 @@ namespace {
 
     template <class K, class V>
     std::pair<K, V> const& min_binding (tree<K, V> const& t) {
-      return t.match<std::pair<K, V> const&>(
+      return t.template match<std::pair<K, V> const&>(
         [](empty_t) -> std::pair<K, V> const& {  
          throw std::runtime_error{"min_binding"};
        },
@@ -162,7 +162,7 @@ namespace {
 
     template <class K, class V>
     std::pair<K, V> const& max_binding (tree<K, V> const& t) {
-      return t.match<std::pair<K, V> const&>(
+      return t.template match<std::pair<K, V> const&>(
         [](empty_t) -> std::pair<K, V> const& {  
          throw std::runtime_error{"max_binding"};
        },
@@ -200,8 +200,13 @@ namespace {
   private:
     tree_type impl_; //the root of the tree
 
+  private:
     //Extension constructor for internal use
-    template <class T>
+    template <
+      class T,
+      class = pgs::enable_if_t<
+        std::is_same<pgs::decay_t<T>, tree_type>::value, void>
+    >
     binary_search_tree (T&& n) : impl_{std::forward<T> (n)}
     {}
 
@@ -233,7 +238,7 @@ namespace {
     //binding `k`
     self_type remove (K const& k) const {
       return this->fold (self_type {},
-        [&k](self_type const& acc, value_type const& p) {
+        [&k](self_type const& acc, value_type const& p) -> self_type {
           return k == p.first ? acc : acc.insert (p);
       });
     }
@@ -241,7 +246,7 @@ namespace {
     //Compute the number of bindings in the tree
     std::size_t size () const {
       return this->fold (std::size_t{0}
-          , [](std::size_t acc, auto const&) { return ++acc; });
+          , [](std::size_t acc, value_type const&) { return ++acc; });
     }
 
     //True if `k` is bound
@@ -259,28 +264,28 @@ namespace {
     //lexicographicaly on keys
     template <class ItT>
     ItT bindings (ItT dst) const {
-      return this->fold (dst, [](auto dst, auto const& n) { 
+      return this->fold (dst, [](ItT dst, value_type const& n) { 
           return *dst++ = n; });
     }
 
     //Check if all the bindings in the tree satisfy the predicate `p`
     template <class P>
     bool for_all (P const& p) const {
-      return this->fold (true, [&p](auto acc, auto const& n) { 
+      return this->fold (true, [&p](bool acc, value_type const& n) { 
           return acc && p (n); });
     }
 
     //True if at least one binding satisfies the predicate `p`
     template <class P>
     bool exists (P const& p) const {
-      return fold (false, [&p](auto acc, auto const& n) {
+      return fold (false, [&p](bool acc, value_type const& n) {
           return acc || p (n); });
     }
 
     //Compute a tree all the bindings that satisfy the predicate 'p'
     template <class P>
     self_type filter (P const& p) const {
-      auto f = [&p](auto const& acc, value_type const& b) {
+      auto f = [&p](self_type const& acc, value_type const& b) {
         if (p (b))
           return acc.insert (b);
         return acc;
@@ -303,7 +308,7 @@ namespace {
     template <class F>
     auto map (F f) -> 
       binary_search_tree<K, decltype (f (std::declval<V>()))> {
-      auto l = [=](auto const& acc, value_type const& b) {
+      auto l = [=](self_type const& acc, value_type const& b) {
         return acc.insert (std::make_pair (b.first, f (b.second)));
       };
       return this->fold (self_type{}, l);
@@ -323,13 +328,24 @@ namespace {
 
   };
 
-  //Factory function for creating a tree from a list
   template <class ItT>
-  auto mk_tree (ItT begin, ItT end) {
+  struct tree_type_from_it {
     using node_t = typename std::iterator_traits<ItT>::value_type;
     using key_t = typename node_t::first_type;
     using val_t = typename node_t::second_type;
     using tree_t = binary_search_tree<key_t, val_t>;
+
+    using type = tree_t;
+  };
+
+  template <class ItT>
+  using tree_type_from_it_t =typename tree_type_from_it<ItT>::type;
+
+
+  //Factory function for creating a tree from a list
+  template <class ItT>
+  tree_type_from_it_t<ItT> mk_tree (ItT begin, ItT end) {
+    using tree_t = tree_type_from_it_t<ItT>;
 
     tree_t l;
     for (; begin != end; l = l.insert(*begin++));
@@ -393,13 +409,13 @@ TEST (pgs, tree2_more) {
   );
   std::cout << '\n';
 
-  auto everyone_of_age = [](auto const& b) { return b.second > 21; };
+  auto everyone_of_age = [](std::pair<std::string, int> const& b) { return b.second > 21; };
   EXPECT_FALSE (ages.for_all (everyone_of_age));
-  auto no_senior_citizen = [](auto const& b) { return b.second < 70; };
+  auto no_senior_citizen = [](node_t const& b) { return b.second < 70; };
   EXPECT_TRUE (ages.for_all (no_senior_citizen));
-  auto sebastien = [](auto const& b) { return b.first == "sebastien"; };
+  auto sebastien = [](node_t const& b) { return b.first == "sebastien"; };
   EXPECT_TRUE (ages.exists (sebastien));
-  auto gru = [](auto const& b) { return b.first == "gru"; };
+  auto gru = [](node_t const& b) { return b.first == "gru"; };
   EXPECT_FALSE (ages.exists (gru));
   auto logans_run = ages.filter ([](node_t const& b) { return b.second >= 35; });
   EXPECT_EQ (logans_run.size (), 2);
@@ -416,7 +432,7 @@ TEST (pgs, tree2_more) {
   );
   std::cout << '\n';
 
-  ages = ages.map ([](auto age) { return ++age; });
+  ages = ages.map ([](int age) { return ++age; });
   EXPECT_EQ(ages.lookup (std::string{"henry"}), 67);
 
   EXPECT_EQ (std::make_pair (std::string{"henry"}, 67), ages.min_binding ());
