@@ -5,7 +5,7 @@ find_package(Threads)
 # Library
 
 SET(PGS_TESTS_CPP 
-#    expression.t.cpp
+   expression.t.cpp
 #    match.t.cpp
 #    get.t.cpp
 #    list.t.cpp
