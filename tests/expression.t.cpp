@@ -83,11 +83,11 @@ inline xpr_t div (L&& l, R&& r) {
 //An `ostream` "inserter" for expressions
 std::ostream& operator << (std::ostream& os, xpr_t const& e) {
   return e.match<std::ostream&> (
-    [&](E_const const& e) -> auto& { return os << e.i;  },
-    [&](E_mul const& e) -> auto& { return os << e.l << "*" << e.r;  },
-    [&](E_div const& e)-> auto&  { return os << e.l << "/" << e.r;  },
-    [&](E_add const& e) -> auto& { return os << "(" << e.l << " + " << e.r << ")"; },
-    [&](E_sub const& e) -> auto& { return os << "(" << e.l << " - " << e.r << ")"; }
+    [&](E_const const& e) -> std::ostream& { return os << e.i;  },
+    [&](E_mul const& e) -> std::ostream& { return os << e.l << "*" << e.r;  },
+    [&](E_div const& e)-> std::ostream&  { return os << e.l << "/" << e.r;  },
+    [&](E_add const& e) -> std::ostream& { return os << "(" << e.l << " + " << e.r << ")"; },
+    [&](E_sub const& e) -> std::ostream& { return os << "(" << e.l << " - " << e.r << ")"; }
    );
 }
 

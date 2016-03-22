@@ -49,11 +49,11 @@ struct E_div {
 int eval (xpr_t const& e) {
 
   return e.match<int> (
-    [&](E_const const& e) -> auto { return e.i;  },
-    [&](E_mul const& e) -> auto { return eval (e.l) * eval (e.r); },
-    [&](E_div const& e)-> auto  { return eval (e.l) / eval (e.r); },
-    [&](E_add const& e) -> auto { return eval (e.l) + eval (e.r); },
-    [&](E_sub const& e) -> auto { return eval (e.l) - eval (e.r); }
+    [&](E_const const& e) -> int { return e.i;  },
+    [&](E_mul const& e) -> int { return eval (e.l) * eval (e.r); },
+    [&](E_div const& e)-> int  { return eval (e.l) / eval (e.r); },
+    [&](E_add const& e) -> int { return eval (e.l) + eval (e.r); },
+    [&](E_sub const& e) -> int { return eval (e.l) - eval (e.r); }
    );
 
 }

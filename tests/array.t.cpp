@@ -58,8 +58,9 @@ namespace {
   template <class T>
   struct array_t {
     std::vector <T> data;//array data
-    array_t (int n, T const& val) : data{n, val}
-    {}
+    array_t (int n, T const& val)
+      : data (n, val)//Note not uniform initialization syntax here
+    {}               //intentionally!
     array_t (std::vector<T>&& data) : data {data}
     {}
   };
@@ -103,7 +104,7 @@ namespace {
   //persistent array
   template <class T>
   T const& get (persistent_array<T> const& t, std::size_t i) {
-    return t->match<T const&>(
+    return t->template match<T const&>(
       [=](array_t<T> const& a) -> T const& { 
         return a.data[i]; 
       }
@@ -120,7 +121,7 @@ namespace {
       persistent_array<T> const& t//preserve conceptual 'constness'
     , std::size_t i, T const& v) {
 
-    return t->match<persistent_array<T>>(
+    return t->template match<persistent_array<T>>(
       [&t, &v, i](array_t<T>& a) -> persistent_array<T> {
         T old = a.data[i];
         a.data[i] = v;
@@ -143,7 +144,7 @@ namespace {
   template <class T>
   std::ostream& operator << (
      std::ostream& os, persistent_array<T> const& t) {
-    return t->match<std::ostream&>(
+    return t->template match<std::ostream&>(
       [&](array_t<T> const& a) -> std::ostream& {
         os << "[| ";
         std::copy (a.data.begin (), a.data.end ()
@@ -182,11 +183,11 @@ namespace {
 
   public: 
     persistent_array (int n, T const& val)
-      : impl_{detail::make (n, val)}
+      : impl_{ detail::make (n, val)}
     {}
 
     T const& get (std::size_t i) const {
-      return detail_::get (impl_, i);
+      return detail::get (impl_, i);
     } 
 
     persistent_array<T> set (std::size_t i, T const& val) const {
