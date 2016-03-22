@@ -10,11 +10,11 @@ SET(PGS_TESTS_CPP
    get.t.cpp
    list.t.cpp
    tree.t.cpp
-#    array.t.cpp
+   array.t.cpp
 #    sexpr.t.cpp
-   option.t.cpp
-#    move.t.cpp
-#    copy.t.cpp
+    option.t.cpp
+    move.t.cpp
+    copy.t.cpp
     main.t.cpp
 )
 ADD_EXECUTABLE(pgs_test ${PGS_TESTS_CPP})
