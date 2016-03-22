@@ -62,15 +62,12 @@ namespace {
     return list<T>{ constructor<nil_t>{} };
   }
 
-  // //Factory function for a `cons_t<T>`
-  // template <class U, class V>
-  // inline list<U> cons (U&& hd, V&& tl) {
-  //   return list<decay_t<U>> {constructor<cons_t<decay_t<U>>>{}, std::forward<U>(hd), std::forward<V>(tl) };
-  // }
-
-  template <class U>
-  inline list<U> cons (U const& hd, list<U> const& tl) {
-    return list<U> {constructor<cons_t<U>>{}, hd, tl };
+  //Factory function for a `cons_t<T>`. Watch out, this one is a
+  //little subtle!
+  template <class U, class V>
+  inline list<decay_t<U>> cons (U&& hd, V&& tl) {
+    using T = decay_t<U>;
+    return list<T> {constructor<cons_t<T>>{}, std::forward<U> (hd), std::forward<V> (tl) };
   }
 
   //hd
@@ -154,8 +151,7 @@ namespace {
   namespace list_detail {
     list<int> range_aux (list<int> const& acc, int const s, int e) {
       if (s >= e) return acc;
-      list<int> new_acc = cons (s, acc);
-      return range_aux (new_acc, s + 1, e);
+      return range_aux (cons (s, acc), s + 1, e);
     };
   }//namespace list_detail
 
