@@ -8,7 +8,7 @@ SET(PGS_TESTS_CPP
    expression.t.cpp
    match.t.cpp
    get.t.cpp
-#    list.t.cpp
+   list.t.cpp
 #    tree.t.cpp
 #    array.t.cpp
 #    sexpr.t.cpp

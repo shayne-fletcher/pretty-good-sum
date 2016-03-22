@@ -62,17 +62,21 @@ namespace {
     return list<T>{ constructor<nil_t>{} };
   }
 
-  //Factory function for a `cons_t<T>`
-  template <class U, class V>
-  inline std::remove_cv_t<std::remove_reference_t<V>> cons (U&& hd, V&& tl) {
-    using t = list_value_type_t<std::remove_cv_t<std::remove_reference_t<V>>>;
-    return list<t> {constructor<cons_t<t>>{}, std::forward<U>(hd), std::forward<V>(tl) };
+  // //Factory function for a `cons_t<T>`
+  // template <class U, class V>
+  // inline list<U> cons (U&& hd, V&& tl) {
+  //   return list<decay_t<U>> {constructor<cons_t<decay_t<U>>>{}, std::forward<U>(hd), std::forward<V>(tl) };
+  // }
+
+  template <class U>
+  inline list<U> cons (U const& hd, list<U> const& tl) {
+    return list<U> {constructor<cons_t<U>>{}, hd, tl };
   }
 
   //hd
   template <class T>
   inline T const& hd (list<T> const& l) {
-    return l.match <T const&> (
+    return l.template match <T const&> (
       //case : nil_t
       [] (nil_t const&) -> T const& { 
         throw std::runtime_error{"hd"}; },
@@ -85,7 +89,7 @@ namespace {
   //tail
   template <class T>
   inline list<T> const& tl (list<T> const& l) {
-    return l.match <list<T> const&> (
+    return l.template match <list<T> const&> (
       //case : nil_t
       [] (nil_t const&) -> list<T> const& { 
         throw std::runtime_error{"tl"}; },
@@ -98,7 +102,7 @@ namespace {
   //fold_left
   template <class F, class AccT, class T>
   AccT fold_left (F f, AccT const& acc, list<T> const& l) {
-    return l.match<AccT>(
+    return l.template match<AccT>(
       //case : nil_t
       [=](nil_t){ return acc; },
       //case : cons_t<T>
@@ -110,7 +114,7 @@ namespace {
   //fold_right
   template <class F, class T, class AccT>
   AccT fold_right (F f, list<T> const& l, AccT const& acc) {
-    return l.match<AccT>(
+    return l.template match<AccT>(
       //case : nil_t
       [=](nil_t){ return acc; },
       //case : cons_t<T>
@@ -121,9 +125,9 @@ namespace {
 
   //rev
   template<class T>
-  inline auto rev (list<T> const& l) {
+  inline list<T> rev (list<T> const& l) {
     return fold_left(
-        [](auto const& acc, auto const& x) { return cons (x, acc); }
+        [](list<T> const& acc, T const& x) { return cons (x, acc); }
       , nil<T>()
       , l
    );
@@ -131,14 +135,14 @@ namespace {
 
   //length
   template <class T>
-  inline auto length (list<T> const& l) {
-    return fold_left ([](auto acc, auto const&) { return ++acc; }, 0, l);
+  inline int length (list<T> const& l) {
+    return fold_left ([](int acc, T const&) { return ++acc; }, 0, l);
   }
 
   //nth
   template <class T>
   T const& nth (list<T> const& l, std::size_t i) {
-    return l.match<T const&>(
+    return l.template match<T const&>(
       //case : nil_t
       [](nil_t) -> T const& { 
         throw std::runtime_error {"nth"}; return *(T*)0; },
@@ -150,7 +154,8 @@ namespace {
   namespace list_detail {
     list<int> range_aux (list<int> const& acc, int const s, int e) {
       if (s >= e) return acc;
-      return range_aux (cons (s, acc), s + 1, e);
+      list<int> new_acc = cons (s, acc);
+      return range_aux (new_acc, s + 1, e);
     };
   }//namespace list_detail
 
@@ -183,7 +188,7 @@ namespace {
   auto operator * (list<T> const& a, F k) -> decltype (k (hd (a))) {
     using result_t = decltype (k (hd (a)));
     using t = list_value_type_t<result_t>;
-    return a.match<result_t>(
+    return a.template match<result_t>(
         [](nil_t const&) { return nil<t>(); }, 
         [=](cons_t<T> const& x) { return append (k (x.hd), x.tl * k); }
     );
@@ -193,14 +198,14 @@ namespace {
   // Concatenates a list of lists
   template <class T>
   list<T> join (list<list<T>> const& z) {
-    return z * [](auto const& m) { return m; };
+    return z * [](list<T> const& m) { return m; };
   }
 
   //map - 'map f m = m * \a.unit (f a)'
   //  The equivalent of `std::transform ()`
   template <class T, class F>
   list<T> map (F f, list<T> const& m) {
-    return m * [=](auto const& a) { return unit (f (a)); };
+    return m * [=](T const& a) { return unit (f (a)); };
   }
 
 }//namespace
@@ -221,12 +226,12 @@ TEST (pgs, list) {
   //check [1; 2]^2 = [1; 4]
   list<int> l = rg (1, 3);
   list<int> m = //avoid 'lambda in unevaluated ctx' error
-     map ([](auto m) { return m * m; }, rg (1, 3));
+     map ([](int m) { return m * m; }, rg (1, 3));
   ASSERT_EQ (m, cons (1, cons (4, nil<int>())));
   //cartesian product
   auto n = 
-     l * [&m](auto x) { 
-        return m * [=](auto y) { 
+     l * [&m](int x) { 
+        return m * [=](int y) { 
            return unit (std::make_pair (x, y)); }; 
   };
   ASSERT_EQ (n, cons (std::make_pair (1, 1)
