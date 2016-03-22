@@ -11,11 +11,10 @@ SET(PGS_TESTS_CPP
 #    tree.t.cpp
 #    array.t.cpp
 #    sexpr.t.cpp
-#    option.t.cpp
+    option.t.cpp
 #    move.t.cpp
 #    copy.t.cpp
-#    main.t.cpp
-     simple.cpp
+    main.t.cpp
 )
 ADD_EXECUTABLE(pgs_test ${PGS_TESTS_CPP})
 TARGET_INCLUDE_DIRECTORIES(pgs_test PUBLIC ${CMAKE_SOURCE_DIR}/src)

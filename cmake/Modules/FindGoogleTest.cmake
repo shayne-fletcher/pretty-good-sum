@@ -80,7 +80,7 @@ IF(GTEST_INCLUDE_DIRS)
     set( _gtest_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
     set( _gtest_ORIG_CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
 
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .ia .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .a .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
     IF(WIN32)
       set(CMAKE_FIND_LIBRARY_PREFIXES "")
     ENDIF()
@@ -92,7 +92,7 @@ IF(GTEST_INCLUDE_DIRS)
             ${_header_parent}
         PATH_SUFFIXES
             ${_header_relative}
-            {QDLA_PATH_SUFFIX}
+            ${QDLA_PATH_SUFFIX}
     )
 
     FIND_LIBRARY(__gtest_main_lib NAMES gtest_main
@@ -101,7 +101,7 @@ IF(GTEST_INCLUDE_DIRS)
             ${_header_parent}
         PATH_SUFFIXES
             ${_header_relative}
-            {QDLA_PATH_SUFFIX}
+            ${QDLA_PATH_SUFFIX}
     )
 
 
