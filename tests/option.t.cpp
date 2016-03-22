@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <climits>
+#include <functional>
 
 //type 'a t = Some of 'a | None
 
@@ -28,6 +30,15 @@ struct none_t //Case 2
 template<class T>
 using option = sum_type<some_t<T>, none_t>;
 
+//is_none : `true` if a `some_t<>`, `false` otherwise
+template<class T>
+bool is_none (option<T> const& o) {
+  return o.template match<bool> (
+   [](some_t<T> const&) -> bool { return false; },
+   [](none_t const&) -> bool { return true; }
+  );
+}
+
 //A trait that can "get at" the type `T` contained by an option
 template <class>
 struct option_value_type;
@@ -48,15 +59,6 @@ option<T> some (T&& val) {
   return option<T>{constructor<some_t<T>>{}, std::forward<T> (val)};
 }
 
-//is_none : `true` if a `some_t<>`, `false` otherwise
-template<class T>
-bool is_none (option<T> const& o) {
-  return o.match<bool> (
-   [](some_t<T> const&) { return false; },
-   [](none_t const&) { return true; }
-  );
-}
-
 //is_some : `false` if a `none_t`, `true` otherwise
 template<class T>
 inline bool is_some (option<T> const& o) {
@@ -67,7 +69,7 @@ inline bool is_some (option<T> const& o) {
 //option
 template <class T>
 T const& get (option<T> const & u) {
-  return u.match<T const&> (
+  return u.template match<T const&> (
    [](some_t<T> const& o) -> T const& { return o.data; },
    [](none_t const&) -> T const& { throw std::runtime_error {"get"}; }
   );
@@ -77,7 +79,7 @@ T const& get (option<T> const & u) {
 //option
 template <class T>
 T& get (option<T>& u) {
-  return u.match<T&> (
+  return u.template match<T&> (
    [](some_t<T>& o) -> T& { return o.data; },
    [](none_t&) -> T& { throw std::runtime_error {"get"}; }
    );
@@ -86,7 +88,7 @@ T& get (option<T>& u) {
 //`default x (Some v)` returns `v` and `default x None` returns `x`
 template <class T>
 T default_ (T x, option<T> const& u) {
-  return u.match<T> (
+  return u.template match<T> (
     [](some_t<T> const& o) -> T { return o.data; },
     [=](none_t const&) -> T { return x; }
   );
@@ -96,7 +98,7 @@ T default_ (T x, option<T> const& u) {
 //returns `x`
 template<class F, class U, class T>
 auto map_default (F f, U const& x, option<T> const& u) -> U {
-  return u.match <U> (
+  return u.template match <U> (
     [=](some_t<T> const& o) -> U { return f (o.data); },
     [=](none_t const&) -> U { return x; }
   );
@@ -107,9 +109,9 @@ template<class T, class F>
 auto operator * (option<T> const& o, F k) -> decltype (k (get (o))) {
   using result_t = decltype (k ( get (o)));
   using t = option_value_type_t<result_t>;
-  return o.match<result_t>(
-      [](none_t const&) { return none<t>(); }, 
-      [=](some_t<T> const& o) { return k (o.data); }
+  return o.template match<result_t>  (
+      [](none_t const&) -> result_t { return none<t>(); }, 
+      [=](some_t<T> const& o) -> result_t { return k (o.data); }
   );
 }
 
@@ -123,9 +125,9 @@ option<T> unit (T&& a) {
 template <class T, class F>
 auto map (F f, option<T> const& m) -> option<decltype (f (get (m)))>{
   using t = decltype (f ( get (m)));
-  return m.match<option<t>>(
-      [](none_t const&) { return none<t>(); }, 
-      [=](some_t<T> const& o) { return some (f (o.data)); }
+  return m.template match<option<t>> (
+      [](none_t const&) -> option<t> { return none<t>(); }, 
+      [=](some_t<T> const& o) -> option<t> { return some (f (o.data)); }
   );
 }
 
@@ -152,8 +154,8 @@ namespace {
 
 //safe "arithmetic"
 
-auto add (int x) {
-  return [=](int y) {
+std::function<option<int>(int)> add (int x) {
+  return [=](int y) -> option<int> {
     if ((x > 0) && (y > INT_MAX - x) ||
         (x < 0) && (y < INT_MIN - x)) {
         return none<int>(); //overflow
@@ -162,8 +164,8 @@ auto add (int x) {
   };
 }
 
-auto sub (int x) {
-  return [=](int y) {
+std::function<option<int>(int)> sub (int x) {
+  return [=](int y) -> option<int> {
     if ((x > 0) && (y < (INT_MIN + x)) ||
         (x < 0) && (y > (INT_MAX + x))) {
       return none<int>(); //overflow
@@ -172,9 +174,8 @@ auto sub (int x) {
   };
 }
 
-auto mul (int x) {
-  return [=](int y) {
-
+std::function<option<int>(int)> mul (int x) {
+  return [=](int y) -> option<int> {
     if (y > 0) { //y positive
       if (x > 0) {  //x positive
         if (y > (INT_MAX / x)) {
@@ -204,7 +205,7 @@ auto mul (int x) {
   };
 }
 
-auto div (int x) {
+std::function<option<int>(int)> div (int x) {
   return [=](int y) {
     if (x == 0) {
       return none<int>();//division by 0
@@ -231,3 +232,4 @@ TEST(pgs, safe_arithmetic) {
   //INT_MIN/(-1)
   ASSERT_TRUE (is_none (unit (INT_MIN) * div (-1)));
 }
+
