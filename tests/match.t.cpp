@@ -22,27 +22,27 @@ using xpr_t = pgs::sum_type<
 
 struct E_const { 
   int i; 
-  E_const (int i) : i (i) 
+  E_const (int i) : i {i} 
   {} 
 };
 struct E_add {
   xpr_t l, r;
-  E_add (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+  E_add (xpr_t const& l, xpr_t const& r) : l {l}, r{r} 
   {}
 };
 struct E_sub {
   xpr_t l, r;
-  E_sub (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+  E_sub (xpr_t const& l, xpr_t const& r) : l {l}, r {r} 
   {}
 };
 struct E_mul {
   xpr_t l, r;
-  E_mul (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+  E_mul (xpr_t const& l, xpr_t const& r) : l {l}, r {r} 
   {}
 };
 struct E_div {
   xpr_t l, r;
-  E_div (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+  E_div (xpr_t const& l, xpr_t const& r) : l {l}, r {r} 
   {}
 };
 

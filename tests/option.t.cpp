@@ -33,10 +33,7 @@ using option = sum_type<some_t<T>, none_t>;
 //is_none : `true` if a `some_t<>`, `false` otherwise
 template<class T>
 bool is_none (option<T> const& o) {
-  return o.template match<bool> (
-   [](some_t<T> const&) -> bool { return false; },
-   [](none_t const&) -> bool { return true; }
-  );
+  return o.is<none_t> ();
 }
 
 //A trait that can "get at" the type `T` contained by an option
@@ -55,14 +52,15 @@ option<T> none () {
 
 //Factory function for case `some_t<>`
 template <class T>
-option<T> some (T&& val) {
-  return option<T>{constructor<some_t<T>>{}, std::forward<T> (val)};
+option<decay_t<T>> some (T&& val) {
+  using t = decay_t<T>;
+  return option<t>{constructor<some_t<t>>{}, std::forward<T> (val)};
 }
 
 //is_some : `false` if a `none_t`, `true` otherwise
 template<class T>
 inline bool is_some (option<T> const& o) {
-  return !is_none (o);
+  return o.is<some_t<T>>();
 }
 
 //Attempt to get a `const` reference to the value contained by an
@@ -117,7 +115,7 @@ auto operator * (option<T> const& o, F k) -> decltype (k (get (o))) {
 
 //Option monad 'unit'
 template<class T>
-option<T> unit (T&& a) {
+option<decay_t<T>> unit (T&& a) {
   return some (std::forward<T> (a));
 }
 
@@ -133,7 +131,6 @@ auto map (F f, option<T> const& m) -> option<decltype (f (get (m)))>{
 
 }//namespace<anonymous>
 
-/*
 TEST (pgs, option) {
   ASSERT_EQ (get(some (1)), 1);
   ASSERT_THROW (get (none<int>()), std::runtime_error);
@@ -146,11 +143,10 @@ TEST (pgs, option) {
 
   ASSERT_EQ (default_(1, none<int>()), 1);
   ASSERT_EQ (default_(1, some(3)), 3);
-  auto h = [](int y){ return float (y * y); };
+  auto h = [](int y) -> float{ return float (y * y); };
   ASSERT_EQ (map_default (h, 0.0, none<int>()), 0.0);
   ASSERT_EQ (map_default (h, 0.0, some (3)), 9.0);
 }
-*/
 
 namespace {
 

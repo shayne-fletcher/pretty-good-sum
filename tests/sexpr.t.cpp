@@ -19,39 +19,36 @@ namespace {
 
   struct atom_bool { 
     bool val; 
-    explicit atom_bool (bool val) : val (val) 
+    explicit atom_bool (bool val) : val {val} 
     {}
   };
 
   struct atom_int { 
     int val; 
-    explicit atom_int (int val) : val (val) 
+    explicit atom_int (int val) : val {val} 
     {}
   };
 
   struct atom_float { 
     double val; 
-    explicit atom_float (double val) : val (val) 
+    explicit atom_float (double val) : val {val} 
     {}
   };
 
   struct atom_string { 
     std::string val; 
-    explicit atom_string (std::string const& val) : val (val) 
-    {}
-    explicit atom_string (std::string&& val) : val (std::move (val)) 
+    template <class S>
+      explicit atom_string (S&& val) : val {std::forward<S> (val)}
     {}
   };
 
-  /*
-    type atom =
-    | Atom_unit
-    | Atom_bool of bool
-    | Atom_int of int
-    | Atom_float of float
-    | Atom_string of string
-  */
-  using atom = sum_type<atom_unit, atom_bool, atom_int, atom_float, atom_string>;
+  using atom = sum_type<
+      atom_unit
+    , atom_bool
+    , atom_int
+    , atom_float
+    , atom_string
+  >;
 
   std::string string_of_atom (atom const& a) {
     return a.match<std::string>(
@@ -65,26 +62,22 @@ namespace {
 
   struct expr_atom { 
     atom val; 
-    expr_atom (atom const& val) : val (val)
-    {}
-    expr_atom (atom&& val) : val (std::move (val))
+    template <class A>
+      explicit expr_atom (A&& val) : val {std::forward<A> (val)}
     {}
   };
 
   struct expr_list;
 
-  /*
-    type expr =
-    | Expr_atom of atom
-    | Expr_list of expr list
-  */
-  using expr =  sum_type<expr_atom, recursive_wrapper<expr_list>>;
+  using expr = sum_type<
+    expr_atom
+  , recursive_wrapper<expr_list>
+  >;
 
   struct expr_list {
     std::list<expr> val;
-    explicit expr_list(std::list<expr>const& l) : val (l)
-    {}
-    explicit expr_list(std::list<expr>&& l): val (std::move (l))
+    template <class L>
+      explicit expr_list (L&& l) : val { std::forward<L> (l)}
     {}
   };
 
@@ -182,34 +175,22 @@ namespace {
     //Test for int
     bool is_int () const {
       return impl_.match<bool>(
-        [](expr_atom const& e) {
-          return e.val.match<bool>(
-           [](atom_int const& b) -> bool { return true; },
-           [](otherwise) -> bool { return false; }
-         ); },
-        [](otherwise) -> bool { return false; }
+       [](expr_atom const& e) { return e.val.is<atom_int> (); },
+       [](otherwise) -> bool { return false; }
       );
     }
     //Test for float
     bool is_float () const {
       return impl_.match<bool>(
-        [](expr_atom const& e) {
-          return e.val.match<bool>(
-           [](atom_float const& b) -> bool { return true; },
-           [](otherwise) -> bool { return false; }
-         ); },
-        [](otherwise) -> bool { return false; }
+       [](expr_atom const& e) { return e.val.is<atom_float> (); },
+       [](otherwise) -> bool { return false; }
       );
     }
     //Test for string
     bool is_string () const {
       return impl_.match<bool>(
-        [](expr_atom const& e) {
-          return e.val.match<bool>(
-           [](atom_string const& b) -> bool { return true; },
-           [](otherwise) -> bool { return false; }
-         ); },
-        [](otherwise) -> bool { return false; }
+       [](expr_atom const& e) { return e.val.is<atom_string> (); },
+       [](otherwise) -> bool { return false; }
       );
     }
     //Test for list
@@ -228,23 +209,17 @@ namespace {
     }
 
     //Attempt to get a `const` reference to the atom this s-expression
-    //represents. Throw `std::runtime_error` if the expression is not
-    //an atom
+    //represents. Throws a `pgs::invalid_sum_type_access` exception if
+    //the expression is not an atom
     expr_atom const& get_atom () const {
-      return impl_.match<expr_atom const&>(
-       [](expr_atom const& e) -> expr_atom const& { return e; },
-       [](otherwise) -> expr_atom const& { throw std::runtime_error{"get_atom"}; }
-     );
+      return pgs::get<expr_atom> (impl_);
     }
 
     //Attempt to get a `const` reference to the list of expressions
     //that this s-expression represents. Throw `std::runtime_error` if
     //it's not a list
     expr_list const& get_list () const {
-      return impl_.match<expr_list const&>(
-       [](expr_list const& e) -> expr_list const& { return e; },
-       [](otherwise) -> expr_list const& { throw std::runtime_error{"get_list"}; }
-     );
+      return pgs::get<expr_list> (impl_);
     }
 
     //Conversions

@@ -49,10 +49,7 @@ namespace {
 
     template <class K, class V>
     bool empty (tree<K, V> const& t) {
-      return t.template match<bool>(
-       [](empty_t) -> bool { return true; },
-       [](node_t<K, V> const&) -> bool { return false; }
-       );
+      return t.is<empty_t> ();
     }
 
     template <class K, class V, class AccT, class F>
@@ -135,14 +132,15 @@ namespace {
 
     template <class K, class V, class P>
     std::pair<tree<K, V>, tree<K, V>> partition (tree<K, V> const& t, P const& p) {
-      auto f = [&p](std::pair<tree<K, V>, tree<K, V>> const& acc, std::pair<K, V> const& b) {
+      auto f = [&p](
+          std::pair<tree<K, V>, tree<K, V>> const& acc, std::pair<K, V> const& b) {
         auto const& l = acc.first;
         auto const& r = acc.second;
         if (p (b))
           return std::make_pair (insert (l, b), r);
         return std::make_pair (l, insert (r, b));
       };
-      tree<K, V> const empty{constructor<empty_t>{}};
+      tree<K, V> const empty {constructor<empty_t>{}};
       return fold (t, std::make_pair (empty, empty), f);
     }
 

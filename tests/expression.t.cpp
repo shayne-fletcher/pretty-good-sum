@@ -29,33 +29,37 @@ using xpr_t = sum_type<
   , recursive_wrapper<E_div>
   >;
 
-//Addition expressions contain a left operand and a right operand
-struct E_add {
-  xpr_t l, r;
-  E_add (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
-  {}
-};
-
-//Subtraction expressions contain a left operand and a right operand
-struct E_sub {
-  xpr_t l, r;
-  E_sub (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
-  {}
-};
-
-//Multiplication expressions contain a left operand and a right
+//Base class for expressions that contain a left operand and a right
 //operand
-struct E_mul {
+struct op {
   xpr_t l, r;
-  E_mul (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+
+  template <class U, class V>
+  op (U&& l, V&& r) : l {std::forward<U> (l)}, r {std::forward<V> (r)} 
   {}
 };
 
-//Division expressions contain a left operand and a right
-//operand
-struct E_div {
-  xpr_t l, r;
-  E_div (xpr_t const& l, xpr_t const& r) : l (l), r (r) 
+struct E_add : op {
+  template <class U, class V>
+  E_add (U&& l, V&& r) : op {std::forward<U> (l), std::forward<V> (r)}
+  {}
+};
+
+struct E_sub : op{
+  template <class U, class V>
+  E_sub (U&& l, V&& r) : op {std::forward<U> (l), std::forward<V> (r)}
+  {}
+};
+
+struct E_mul : op {
+  template <class U, class V>
+  E_mul (U&& l, V&& r) : op {std::forward<U> (l), std::forward<V> (r)}
+  {}
+};
+
+struct E_div : op {
+  template <class U, class V>
+  E_div (U&& l, V&& r) : op {std::forward<U> (l), std::forward<V> (r)}
   {}
 };
 
@@ -82,12 +86,23 @@ inline xpr_t div (L&& l, R&& r) {
 
 //An `ostream` "inserter" for expressions
 std::ostream& operator << (std::ostream& os, xpr_t const& e) {
+
   return e.match<std::ostream&> (
-    [&](E_const const& e) -> std::ostream& { return os << e.i;  },
-    [&](E_mul const& e) -> std::ostream& { return os << e.l << "*" << e.r;  },
-    [&](E_div const& e)-> std::ostream&  { return os << e.l << "/" << e.r;  },
-    [&](E_add const& e) -> std::ostream& { return os << "(" << e.l << " + " << e.r << ")"; },
-    [&](E_sub const& e) -> std::ostream& { return os << "(" << e.l << " - " << e.r << ")"; }
+    [&](E_const const& e) -> std::ostream& { 
+      return os << e.i;  
+    },
+    [&](E_mul const& e) -> std::ostream& { 
+      return os << e.l << "*" << e.r;  }
+    ,
+    [&](E_div const& e)-> std::ostream&  { 
+      return os << e.l << "/" << e.r;  
+    },
+    [&](E_add const& e) -> std::ostream& { 
+      return os << "(" << e.l << " + " << e.r << ")"; 
+    },
+    [&](E_sub const& e) -> std::ostream& { 
+      return os << "(" << e.l << " - " << e.r << ")"; 
+    }
    );
 }
 

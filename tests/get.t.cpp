@@ -29,12 +29,11 @@ namespace {
     return list<T>{constructor<nil_t<T>>{}};
   }
 
-  template <class T>
-  inline list<T> cons (T&& t, list<T>&& l) {
-    return list<T>{
-      constructor<cons_t<T>>{}, std::forward<T> (t), std::forward<list<T>>(l)};
+  template <class U, class V>
+  inline list<decay_t<U>> cons (U&& hd, V&& tl) {
+    using T = decay_t<U>;
+    return list<T> {constructor<cons_t<T>>{}, std::forward<U> (hd), std::forward<V> (tl) };
   }
-
 
 }//namespace
 
