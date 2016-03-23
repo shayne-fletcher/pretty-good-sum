@@ -78,14 +78,14 @@ namespace pgs {
     //! \brief Produce a non-`const` pointer to the object referred
     //! to by the value field of the provided union
     static constexpr auto ptr (recursive_union<T, Ts...>& u) 
-      -> decltype (std::addressof (u.v.get ())) {
-      return std::addressof (u.v.get ());
+      -> decltype (u.v.get_pointer ()) {
+      return u.v.get_pointer ();
     }
     //! \brief Produce a `const` pointer to the object referred
     //! to by the value field of the provided union
     static constexpr auto ptr (recursive_union<T, Ts...> const& u) 
-      -> decltype (std::addressof (u.v.get ())) {
-      return std::addressof (u.v.get ());
+      -> decltype (u.v.get ()) {
+      return u.v.get_pointer ();
     }
   };
 
