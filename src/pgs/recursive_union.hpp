@@ -16,8 +16,6 @@
 #  include <type_traits>
 #  include <iostream>
 
-namespace BloombergLP {
-
 namespace pgs {
 
   //! \brief A type to model a sum constructor
@@ -751,7 +749,5 @@ namespace pgs {
 #  endif//defined (_MSC_VER)
 
 }//namespace pgs
-
-}//namespace BloombergLP
 
 #endif //!defined (RECURSIVE_UNION_93F14ED0_E99B_4CF3_8A9B_EBE084D9079C_H)

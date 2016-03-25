@@ -2,8 +2,6 @@
 
 #include <gtest/gtest.h>
 
-using namespace BloombergLP;
-
 namespace {
 struct E_const;
 struct E_add;

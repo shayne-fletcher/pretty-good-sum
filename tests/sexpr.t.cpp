@@ -11,7 +11,6 @@
 
 namespace {
 
-  using namespace BloombergLP;
   using namespace pgs;
 
   struct atom_unit 

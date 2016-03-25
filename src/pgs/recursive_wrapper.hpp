@@ -13,8 +13,6 @@
 
 #include <utility> // std::forward<>()
 
-namespace BloombergLP {
-
 namespace pgs {
 
 //! \cond
@@ -227,8 +225,6 @@ template <typename T>
 T const* recursive_wrapper<T>::get_pointer() const { return p_; }
 
 }//namespace pgs
-
-}//namespace BloombergLP
 
 //! \endcond
 

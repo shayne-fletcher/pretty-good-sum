@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 
-namespace BloombergLP {
 namespace qfd {
 namespace contract {
 
@@ -61,7 +60,6 @@ inline std::ostream& operator << (
 
 } // namespace contract 
 } // namespace qfd 
-} // namespace BloombergLP 
 
 int main () {
 

@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 namespace {
-  using namespace BloombergLP;
   using namespace pgs;
   
   template <class T> struct cons;

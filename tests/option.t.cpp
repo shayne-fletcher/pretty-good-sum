@@ -11,7 +11,6 @@
 
 namespace {
 
-using namespace BloombergLP;
 using namespace pgs;
 
 template <class T>

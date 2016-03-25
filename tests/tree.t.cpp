@@ -10,7 +10,6 @@
 
 namespace {
 
-  using namespace BloombergLP;
   using namespace pgs;
 
   namespace tree_detail {

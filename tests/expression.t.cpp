@@ -4,7 +4,6 @@
 
 namespace {
 
-using namespace BloombergLP;
 using namespace pgs;
 
 //The various cases of an expression
