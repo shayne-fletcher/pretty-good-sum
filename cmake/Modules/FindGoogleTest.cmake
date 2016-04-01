@@ -53,7 +53,7 @@ LIST(APPEND __gtest_includedir_hint ${GTEST_ROOT})
 LIST(APPEND __gtest_includedir_hint $ENV{GTEST_ROOT})
 # 5 Qdla infra (Windows)
 IF(QDLA_FOUND)
-  LIST(APPEND __gtest_includedir_hint ${QDLA_ROOT}/gtest/include)
+  LIST(APPEND __gtest_includedir_hint ${QDLA_ROOT}/google/gtest/include)
 ENDIF()
 # 6 Now Robo
 IF(ROBO_FOUND)

@@ -3,6 +3,7 @@ find_package(GoogleTest REQUIRED) #Google test
 find_package(Threads)
 
 SET(PGS_TESTS_CPP 
+   fibonacci.t.cpp
    expression.t.cpp
    match.t.cpp
    get.t.cpp
