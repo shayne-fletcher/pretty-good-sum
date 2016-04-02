@@ -32,7 +32,7 @@ using option = sum_type<some_t<T>, none_t>;
 //is_none : `true` if a `some_t<>`, `false` otherwise
 template<class T>
 bool is_none (option<T> const& o) {
-  return o.is<none_t> ();
+  return o.template is<none_t> ();
 }
 
 //A trait that can "get at" the type `T` contained by an option
@@ -59,7 +59,7 @@ option<decay_t<T>> some (T&& val) {
 //is_some : `false` if a `none_t`, `true` otherwise
 template<class T>
 inline bool is_some (option<T> const& o) {
-  return o.is<some_t<T>>();
+  return o.template is<some_t<T>>();
 }
 
 //Attempt to get a `const` reference to the value contained by an

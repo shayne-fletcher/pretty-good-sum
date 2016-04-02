@@ -48,7 +48,7 @@ namespace {
 
     template <class K, class V>
     bool empty (tree<K, V> const& t) {
-      return t.is<empty_t> ();
+      return t.template is<empty_t> ();
     }
 
     template <class K, class V, class AccT, class F>
@@ -400,11 +400,11 @@ TEST (pgs, tree2_more) {
   EXPECT_EQ (ages.lookup (std::string {"sally"}), 25);
   EXPECT_THROW (ages.lookup (std::string {"gru"}), std::runtime_error);
 
-  std::cout << "Bindings : ";
-  ages.bindings (
-    std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
-  );
-  std::cout << '\n';
+  // std::cout << "Bindings : ";
+  // ages.bindings (
+  //   std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
+  // );
+  // std::cout << '\n';
 
   auto everyone_of_age = [](std::pair<std::string, int> const& b) { return b.second > 21; };
   EXPECT_FALSE (ages.for_all (everyone_of_age));
@@ -418,16 +418,16 @@ TEST (pgs, tree2_more) {
   EXPECT_EQ (logans_run.size (), 2);
 
   auto pp = ages.partition ([](node_t const& b) { return b.second < 30; });
-  std::cout << "Those under 30: ";
-  pp.first.bindings (
-    std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
-  );
-  std::cout << '\n';
-  std::cout << "Those 30 and over: ";
-  pp.second.bindings (
-    std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
-  );
-  std::cout << '\n';
+  // std::cout << "Those under 30: ";
+  // pp.first.bindings (
+  //   std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
+  // );
+  // std::cout << '\n';
+  // std::cout << "Those 30 and over: ";
+  // pp.second.bindings (
+  //   std::ostream_iterator<std::pair<std::string, int>>(std::cout, " ")
+  // );
+  // std::cout << '\n';
 
   ages = ages.map ([](int age) { return ++age; });
   EXPECT_EQ(ages.lookup (std::string{"henry"}), 67);

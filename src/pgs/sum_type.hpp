@@ -48,6 +48,9 @@
 //! \example list.t.cpp
 //! Implementation of a functional list
 //!
+//! \example fibonacci.t.cpp
+//! Lazy streams
+//!
 //! \example tree.t.cpp
 //! Dead simple, purely functional binary search tree
 //!

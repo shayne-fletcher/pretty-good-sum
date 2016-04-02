@@ -82,7 +82,7 @@ namespace pgs {
     //! \brief Produce a `const` pointer to the object referred
     //! to by the value field of the provided union
     static constexpr auto ptr (recursive_union<T, Ts...> const& u) 
-      -> decltype (u.v.get ()) {
+      -> decltype (u.v.get_pointer ()) {
       return u.v.get_pointer ();
     }
   };
